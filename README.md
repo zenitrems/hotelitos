@@ -10,4 +10,5 @@ npm install
 npm run serve
 ```
 #### ToDo
--
+- fetch prices, offers
+- hotel list view in cards 
