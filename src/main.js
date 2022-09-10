@@ -1,9 +1,8 @@
 import Vue from "vue";
 import App from "./App.vue";
-
 import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
-
+import axios from "axios";
 
 import vuetify from "./plugins/vuetify";
 
@@ -14,6 +13,8 @@ Icon.Default.mergeOptions({
   shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
 });
 
+
+axios.defaults.baseURL = "http://localhost:3000";
 window.Vue = Vue;
 Vue.config.productionTip = false;
 new Vue({

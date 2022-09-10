@@ -1,92 +1,95 @@
 <template>
   <div class="wrapper">
+    <v-layout row justify-center>
+      <v-flex xs12 sm6 md4 height>
+        <v-autocomplete
+          v-model="model"
+          :items="items"
+          :loading="isLoading"
+          :search-input.sync="search"
+          chips
+          clearable
+          hide-no-data
+          hide-selected
+          item-text="name"
+          item-value="hotelId"
+          label="busca un hotel"
+          prepend-icon="hotel"
+          return-object
+        >
+        </v-autocomplete>
+      </v-flex>
+    </v-layout>
+
     <v-layout align-center justify-center row fill-height>
       <v-flex md5>
-        <v-container fluid grid-list-md>
-          <v-card>
-            <v-toolbar flat class="elevation-1 dense">
-              <v-toolbar-title>Hoteles</v-toolbar-title>
-              <v-divider class="mx-2" inset vertical></v-divider>
-              <v-spacer></v-spacer>
-              <v-text-field
-                class="text-xs-center"
-                v-model="search"
-                append-icon="search"
-                label="Búsqueda"
-                single-line
-                hide-details
-              ></v-text-field>
-              <v-spacer></v-spacer>
-              <v-icon @click="getGeo()">map</v-icon>
-            </v-toolbar>
-            <v-spacer></v-spacer>
-            <v-data-table
-              :headers="headers"
-              :items="hotels"
-              :search="search"
-              :items-per-page="15"
-              class="elevation-1"
-              dense
-            >
-              <template v-slot:items="{ hotels }">
-                <tr v-for="hotel in hotels" :key="hotel.hotelId">
-                  <td>{{ hotel.name }}</td>
-                  <td>{{ hotel.hotelId }}</td>
-                  <td>{{ hotel.chainCode }}</td>
-                  <td>
-                    <v-icon large class="mr-2" @click="goToHotel(hotel.hotelId)"
-                      >map</v-icon
-                    >
-                  </td>
-                </tr>
-              </template>
-              <template v-slot:no-data>
-                <v-btn color="primary" @click="listHotels">Reload</v-btn>
-              </template>
-            </v-data-table>
-          </v-card>
-        </v-container>
-      </v-flex>
+        <v-card class="mx-auto" max-width="320">
+          <v-img
+            src="https://cdn.vuetifyjs.com/images/cards/sunshine.jpg"
+            height="200px"
+          ></v-img>
 
-      <v-flex md5>
-        <v-container fluid grid-list-md>
-          <v-card>
-            <!-- map -->
-            <l-map style="height: 620px" :zoom="zoom" :center="center">
-              <l-tile-layer
-                :url="url"
-                :attribution="attribution"
-              ></l-tile-layer>
-              <l-marker
-                v-for="item in geoDraws"
-                :key="item.hotelId"
-                :lat-lng="item.geoObj"
-              >
-                <l-popup>
-                  <span>{{ item.hotelName }}</span>
-                  <v-spacer> </v-spacer>
-                  <span
-                    ><h4>Hotel ID:</h4>
-                    {{ item.hotelId }}
-                  </span>
-                </l-popup>
-              </l-marker>
-            </l-map>
-          </v-card>
-        </v-container>
+          <v-card-title></v-card-title>
+
+          <v-card-subtitle> </v-card-subtitle>
+
+          <v-card-actions>
+            <v-btn
+              color="orange lighten-2"
+              text
+              @click="hotelLoc(this.hotel.name)"
+            >
+              Explore
+            </v-btn>
+
+            <v-spacer></v-spacer>
+
+            <v-btn icon @click="show = !show">
+              <v-icon>{{
+                show ? "keyboard_arrow_up" : "keyboard_arrow_down"
+              }}</v-icon>
+            </v-btn>
+          </v-card-actions>
+
+          <v-expand-transition>
+            <div v-show="show">
+              <v-divider></v-divider>
+
+              <v-card-text>
+                I'm a thing. But, like most politicians, he promised more
+              </v-card-text>
+            </div>
+          </v-expand-transition>
+        </v-card>
+      </v-flex>
+      <v-flex md5 class="mapFlex">
+        <v-card>
+          <!-- map -->
+          <l-map style="height: 623px" :zoom="zoom" :center="center">
+            <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
+            <l-marker :lat-lng="center">
+              <l-popup>
+                <span></span>
+                <v-spacer> </v-spacer>
+                <span><h4>Hotel ID:</h4> </span>
+              </l-popup>
+            </l-marker>
+          </l-map>
+        </v-card>
       </v-flex>
     </v-layout>
   </div>
 </template>
 <style>
 .wrapper {
-  height: 100%;
-  background-color: whitesmoke;
+  padding: 20px;
+}
+.mapFlex {
+  z-index: 0;
 }
 </style>
 <script>
 import axios from "axios";
-const url = (axios.defaults.baseURL = "http://localhost:3000/");
 import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
 export default {
   components: {
@@ -102,70 +105,67 @@ export default {
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       zoom: 12,
       center: [21.115, -86.817],
+
+      isLoading: false,
+      items: [],
+      model: [],
+      search: null,
+
       hotels: [],
-      geoDraws: [],
-      search: "",
-      headers: [
-        { text: "Hotel", align: "left", sortable: false, value: "name" },
-        { text: "hotelId", value: "hotelId", sortable: false },
-        { text: "chainCode", value: "chainCode" },
-        { text: "Action", value: "action", sortable: false },
-      ],
+      viewGeo: [],
+      show: false,
     };
   },
-  created() {
-    this.listHotels();
+  created() {},
+  watch: {
+    async search() {
+      // Items have already been loaded
+      if (this.items > 0) return;
+      this.isLoading = true;
+      // Lazily load input items
+      this.searchDebounced();
+    },
   },
   methods: {
-    async listHotels() {
-      axios
-        .get(url + "list")
-        .then((response) => {
-          this.hotels = response.data;
-          this.listHotel = this.hotels.map((hotel) => {
-            return {
-              chainCode: hotel.chainCode,
-              iataCode: hotel.iataCode,
-              dupeId: hotel.dupeId,
-              hotelName: hotel.name,
-              hotelId: hotel.hotelId,
-              geoObj: {
-                lat: hotel.geoCode.latitude,
-                lon: hotel.geoCode.longitude,
-              },
-              distanceObj: {
-                value: hotel.distance.value,
-                unit: hotel.distance.unit,
-              },
-            };
+    //debounce search query to avoid spamming the server
+    searchDebounced() {
+      // cancel pending call
+      clearTimeout(this._timerId);
+      //delay new call
+      this._timerId = setTimeout(() => {
+        axios
+          .get("/search", { params: { keyword: this.search } })
+          .then((res) => {
+            this.items = res.data.data;
+            this.isLoading = false;
+          })
+          .catch((err) => {
+            console.log(err);
+            this.isLoading = false;
           });
+      }, 800);
+    },
+
+    async getList(icaoCode) {
+      await axios
+        .get("/list", {
+          params: {
+            icaoCode: icaoCode,
+          },
+        })
+        .then((response) => {
+          this.hotels = response.data.data;
+          console.log(this.hotels);
         })
         .catch((err) => {
           console.error(err);
         });
     },
-    async getGeo() {
-      axios
-        .get(url + "list")
-        .then((response) => {
-          this.hotels = response.data;
-          this.geoDraws = this.hotels.map((hotel) => {
-            return {
-              hotelId: hotel.hotelId,
-              hotelName: hotel.name,
-              geoObj: {
-                lat: hotel.geoCode.latitude,
-                lon: hotel.geoCode.longitude,
-              },
-            };
-          });
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    },
-    goToHotel(hotelId) {
-      console.log(hotelId);
+
+    hotelLoc(geoObj) {
+      console.log(geoObj);
+      this.viewGeo = [this.geoObj.latitude, this.geoObj.longitude];
+      console.log(this.viewGeo);
     },
   },
 };
