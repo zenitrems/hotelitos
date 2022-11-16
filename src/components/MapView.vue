@@ -1,43 +1,41 @@
 <template>
-  <div class="wrapper">
-    <v-layout row justify-center>
+  <v-container >
+    <v-layout justify-center>
       <v-flex xs12 sm6 md4 height>
         <v-autocomplete
-          v-model="model"
+          v-model="searched"
           :items="items"
           :loading="isLoading"
           :search-input.sync="search"
-          chips
-          clearable
-          hide-no-data
-          hide-selected
+          no-filter
           item-text="name"
-          item-value="hotelId"
+          item-value="name"
           label="busca un hotel"
           prepend-icon="hotel"
           return-object
+          cache-items
+          clearable
         >
         </v-autocomplete>
       </v-flex>
     </v-layout>
-
     <v-layout align-center justify-center row fill-height>
       <v-flex md5>
         <v-card class="mx-auto" max-width="320">
           <v-img
-            src="https://cdn.vuetifyjs.com/images/cards/sunshine.jpg"
+            src="https://destinationlesstravel.com/wp-content/uploads/2022/05/Birds-eye-view-of-the-Cancun-Hotel-zone-on-a-beautiful-day.jpg.webp"
             height="200px"
           ></v-img>
 
-          <v-card-title></v-card-title>
+          <v-card-title v-text="searched.name"></v-card-title>
 
-          <v-card-subtitle> </v-card-subtitle>
+          <v-card-subtitle v-text="searched.address"></v-card-subtitle>
 
           <v-card-actions>
             <v-btn
               color="orange lighten-2"
               text
-              @click="hotelLoc(this.hotel.name)"
+              @click="hotelLoc(searched.geoCode)"
             >
               Explore
             </v-btn>
@@ -50,14 +48,11 @@
               }}</v-icon>
             </v-btn>
           </v-card-actions>
-
           <v-expand-transition>
             <div v-show="show">
               <v-divider></v-divider>
 
-              <v-card-text>
-                I'm a thing. But, like most politicians, he promised more
-              </v-card-text>
+              <v-card-text v-text="searched.geoCode"> </v-card-text>
             </div>
           </v-expand-transition>
         </v-card>
@@ -65,20 +60,25 @@
       <v-flex md5 class="mapFlex">
         <v-card>
           <!-- map -->
-          <l-map style="height: 623px" :zoom="zoom" :center="center">
+          <l-map
+            class="mapis"
+            style="height: 623px"
+            :zoom="zoom"
+            :center="center"
+          >
             <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
             <l-marker :lat-lng="center">
               <l-popup>
-                <span></span>
+                <span v-text="searched.name"> </span>
                 <v-spacer> </v-spacer>
-                <span><h4>Hotel ID:</h4> </span>
+                <span v-text="searched.id"></span>
               </l-popup>
             </l-marker>
           </l-map>
         </v-card>
       </v-flex>
     </v-layout>
-  </div>
+  </v-container>
 </template>
 <style>
 .wrapper {
@@ -87,11 +87,15 @@
 .mapFlex {
   z-index: 0;
 }
+.mapis {
+  max-height: 400px;
+}
 </style>
 <script>
 import axios from "axios";
 import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
 export default {
+  name: "MapView",
   components: {
     LMap,
     LTileLayer,
@@ -103,27 +107,27 @@ export default {
       url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      zoom: 12,
+      zoom: 15,
       center: [21.115, -86.817],
 
       isLoading: false,
       items: [],
-      model: [],
+      searched: [],
       search: null,
 
       hotels: [],
-      viewGeo: [],
       show: false,
     };
   },
-  created() {},
   watch: {
-    async search() {
+    search(val) {
       // Items have already been loaded
-      if (this.items > 0) return;
+      if (!val) {
+        return;
+      }
       this.isLoading = true;
       // Lazily load input items
-      this.searchDebounced();
+      this.searchDebounced(val);
     },
   },
   methods: {
@@ -131,41 +135,24 @@ export default {
     searchDebounced() {
       // cancel pending call
       clearTimeout(this._timerId);
+      this.isLoading = true;
       //delay new call
       this._timerId = setTimeout(() => {
         axios
           .get("/search", { params: { keyword: this.search } })
           .then((res) => {
             this.items = res.data.data;
+            //console.log(this.items);
             this.isLoading = false;
           })
           .catch((err) => {
             console.log(err);
             this.isLoading = false;
           });
-      }, 800);
+      }, 850);
     },
-
-    async getList(icaoCode) {
-      await axios
-        .get("/list", {
-          params: {
-            icaoCode: icaoCode,
-          },
-        })
-        .then((response) => {
-          this.hotels = response.data.data;
-          console.log(this.hotels);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    },
-
-    hotelLoc(geoObj) {
-      console.log(geoObj);
-      this.viewGeo = [this.geoObj.latitude, this.geoObj.longitude];
-      console.log(this.viewGeo);
+    hotelLoc(geoCode) {
+      this.center = [geoCode.latitude, geoCode.longitude];
     },
   },
 };

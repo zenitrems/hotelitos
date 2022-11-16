@@ -5,6 +5,7 @@ import { Icon } from "leaflet";
 import axios from "axios";
 
 import vuetify from "./plugins/vuetify";
+import router from './router'
 
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
@@ -19,5 +20,6 @@ window.Vue = Vue;
 Vue.config.productionTip = false;
 new Vue({
   vuetify,
-  render: (h) => h(App),
+  router,
+  render: (h) => h(App)
 }).$mount("#app");

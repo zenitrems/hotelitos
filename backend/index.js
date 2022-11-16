@@ -99,7 +99,7 @@ app.get("/list", async function (req, res) {
 }); */
 
 var server = app.listen(process.env.PORT || 3000, () => {
-  console.log("I am running¡¡¡");
+  console.log("I am running on port = " + server.address().port);
 });
 
 let io = socket(server);
