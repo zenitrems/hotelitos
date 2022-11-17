@@ -1,7 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from "@/views/HomeView.vue";
-
+import HomeView from "@/components/HomeView.vue"
 import MapSearch from "@/components/MapView.vue";
 
 Vue.use(VueRouter);
@@ -10,7 +9,7 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    component: Home,
+    component: HomeView,
   },
   {
     path: "/map",
