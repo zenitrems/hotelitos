@@ -1,36 +1,35 @@
 <template>
-  <v-container >
-    <v-layout justify-center>
-      <v-flex xs12 sm6 md4 height>
-        <v-autocomplete
-          v-model="searched"
-          :items="items"
-          :loading="isLoading"
-          :search-input.sync="search"
-          no-filter
-          item-text="name"
-          item-value="name"
-          label="busca un hotel"
-          prepend-icon="hotel"
-          return-object
-          cache-items
-          clearable
-        >
-        </v-autocomplete>
-      </v-flex>
-    </v-layout>
-    <v-layout align-center justify-center row fill-height>
-      <v-flex md5>
-        <v-card class="mx-auto" max-width="320">
+  <v-container fluid fill-height id="wrapper">
+    <v-row align="center" justify="center">
+      <v-col cols="12" sm="8" md="6">
+        <v-container fluid fill-height>
+          <v-autocomplete
+            v-model="searched"
+            :items="items"
+            :loading="isLoading"
+            :search-input.sync="search"
+            no-filter
+            item-text="name"
+            item-value="name"
+            label="busca un hotel"
+            prepend-icon="hotel"
+            return-object
+            cache-items
+          >
+          </v-autocomplete>
+        </v-container>
+      </v-col>
+    </v-row>
+    <!-- CARDS SEC -->
+    <v-row align="center" justify="center">
+      <v-col cols="12" sm="8" md="">
+        <v-card class="mx-auto" max-width="500">
           <v-img
             src="https://destinationlesstravel.com/wp-content/uploads/2022/05/Birds-eye-view-of-the-Cancun-Hotel-zone-on-a-beautiful-day.jpg.webp"
             height="200px"
           ></v-img>
-
           <v-card-title v-text="searched.name"></v-card-title>
-
           <v-card-subtitle v-text="searched.address"></v-card-subtitle>
-
           <v-card-actions>
             <v-btn
               color="orange lighten-2"
@@ -39,9 +38,7 @@
             >
               Explore
             </v-btn>
-
             <v-spacer></v-spacer>
-
             <v-btn icon @click="show = !show">
               <v-icon>{{
                 show ? "keyboard_arrow_up" : "keyboard_arrow_down"
@@ -51,18 +48,17 @@
           <v-expand-transition>
             <div v-show="show">
               <v-divider></v-divider>
-
               <v-card-text v-text="searched.geoCode"> </v-card-text>
             </div>
           </v-expand-transition>
         </v-card>
-      </v-flex>
-      <v-flex md5 class="mapFlex">
-        <v-card>
+      </v-col>
+      <v-col cols="12" sm="8" md="6">
+        <v-card class="mx-auto" max-width="500" dark>
           <!-- map -->
           <l-map
             class="mapis"
-            style="height: 623px"
+            style="height: 300px"
             :zoom="zoom"
             :center="center"
           >
@@ -76,19 +72,19 @@
             </l-marker>
           </l-map>
         </v-card>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 <style>
-.wrapper {
-  padding: 20px;
+#wrapper {
+  padding: auto;
 }
 .mapFlex {
   z-index: 0;
 }
 .mapis {
-  max-height: 400px;
+  max-height: 360;
 }
 </style>
 <script>
@@ -104,9 +100,9 @@ export default {
   },
   data() {
     return {
-      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      url: "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png",
       attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
       zoom: 15,
       center: [21.115, -86.817],
 
