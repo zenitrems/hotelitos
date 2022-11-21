@@ -5,7 +5,7 @@ import { Icon } from "leaflet";
 import axios from "axios";
 
 import vuetify from "./plugins/vuetify";
-import router from './router'
+import router from "./router";
 
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
@@ -14,12 +14,11 @@ Icon.Default.mergeOptions({
   shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
 });
 
-
 axios.defaults.baseURL = "http://localhost:3000";
 window.Vue = Vue;
 Vue.config.productionTip = false;
 new Vue({
   vuetify,
   router,
-  render: (h) => h(App)
+  render: (h) => h(App),
 }).$mount("#app");

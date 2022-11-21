@@ -16,10 +16,11 @@
           cache-items
           solo
           dark
-          btn
         >
         </v-autocomplete>
-        <v-btn @click="hotelSearched(searched)" color="success">text</v-btn>
+        <v-btn @click="hotelSearched(searched.hotelIds)" color="success"
+          >text</v-btn
+        >
       </v-container>
     </v-card>
   </v-container>
@@ -83,10 +84,9 @@ export default {
       }, 850);
     },
     hotelSearched() {
-      console.log(this.searched.id);
       this.$router.push({
         name: "HotelWatch",
-        query: { id: this.searched.id },
+        params: { id: this.searched.hotelIds },
       });
     },
   },
