@@ -1,10 +1,27 @@
 <template>
-  <v-container fluid fill-height>
-    <v-row align="center" justify="center">
+  <v-container fill-height>
+    <v-row align="center">
       <v-col cols="12">
-        <v-skeleton-loader card> </v-skeleton-loader>
-
-        <v-card class="mx-auto" max-width="500"> </v-card>
+        <v-card class="mx-auto" max-width="700" dark dense>
+          <v-list-item three-line>
+            <v-list-item-content>
+              <div class="text-overline mb-4">
+                {{ item.hotel.type }}
+              </div>
+              <v-list-item-title class="text-h5 mb-1">
+                {{ item.hotel.name }}
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                Offer
+              </v-list-item-subtitle>
+              <v-card-text>{{ item.offers }}</v-card-text>
+              <v-card-text></v-card-text>
+              <v-card-text></v-card-text>
+            </v-list-item-content>
+          </v-list-item>
+          <v-card-actions>
+          </v-card-actions>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
@@ -14,12 +31,13 @@ import axios from "axios";
 export default {
   data() {
     return {
-      isLoading: false,
-      items: [],
+      loading: false,
+      item: [],
       show: false,
     };
   },
   created() {
+    this.offerByHotelId();
     if (!this.$route.params) {
       return;
     }
@@ -32,18 +50,16 @@ export default {
       axios
         .get("/offerSearch", { params: { id: idString } })
         .then((res) => {
-          this.items = res.data.data;
+          this.item = res.data.data[0];
 
           this.statusText = res.statusText;
           this.statusCode = res.status;
 
-          console.log(this.items);
+          console.log(this.item);
           console.log(this.statusText, this.statusCode);
-          this.isLoading = false;
         })
         .catch((err) => {
           console.log(err);
-          this.isLoading = false;
         });
     },
   },

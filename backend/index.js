@@ -52,6 +52,8 @@ app.get("/offerSearch", (req, res) => {
     .get({
       hotelIds: id,
       adults: "1",
+      lang: "ES",
+      view: "FULL",
     })
     .then(function (response) {
       res.send(response.result);
