@@ -24,39 +24,38 @@ var amadeus = new Amadeus({
   clientSecret: "sD6bReG5iIxVXU03",
 });
 
-/*  */
-
 // Hotel name autocomplete for keyword 'keyyword' using  HOTEL_GDS category of search
 app.get("/search", async function (req, res) {
   console.log(req.query);
   var keywords = req.query.keyword;
-  const response = await amadeus.referenceData.locations.hotel
+  amadeus.referenceData.locations.hotel
     .get({
       keyword: keywords,
       subType: "HOTEL_GDS",
       lang: "ES",
     })
-    .catch((err) => console.log(err));
-  try {
-    await res.json(JSON.parse(response.body));
-  } catch (err) {
-    await res.json(err);
-  }
+    .then(function (response) {
+      res.send(response.result);
+    })
+    .catch(function (err) {
+      console.error(err);
+    });
 });
 
 app.get("/offerSearch", (req, res) => {
   // Get list of available offers in specific hotels by hotel id
   var id = req.query.id;
   console.log(id);
-  amadeus.shopping.hotelOffersSearch
+  amadeus.shopping.hotelOffersByHotel
     .get({
-      hotelIds: id,
+      hotelId: id,
       adults: "1",
       lang: "ES",
       view: "FULL",
     })
     .then(function (response) {
-      res.send(response.result);
+      console.log(response);
+      res.send(response);
     })
     .catch(function (err) {
       console.error(err);
@@ -101,12 +100,10 @@ app.get("/offerSearch", (req, res) => {
   }
 }); */
 
-var server = app.listen(process.env.PORT || 3000, () => {
+let io = socket(server);
+var server = app.listen(process.env.PORT, () => {
   console.log("I am running on port = " + server.address().port);
 });
-
-let io = socket(server);
-
 io.on("connection", function (socket) {
   console.log("Socket Connection Established with ID :" + socket.id);
 });

@@ -74,8 +74,8 @@ export default {
             this.items = res.data.data;
             this.status = res.status;
             this.statusText = res.statusText;
-            console.log(this.status, this.statusText);
             this.isLoading = false;
+            console.log(this.status, this.statusText);
           })
           .catch((err) => {
             console.log(err);
