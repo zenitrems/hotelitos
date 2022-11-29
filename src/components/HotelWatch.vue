@@ -1,64 +1,94 @@
 <template>
   <v-container class="center-padding" fluid fill-height>
-    <v-row>
-      <v-col>
-        <v-card class="mx-auto" max-width="600" elevation="12">
-          <v-img class="white--text align-end" height="200px" src="https://cdn.vuetifyjs.com/images/cards/docks.jpg">
-            <v-card-title>{{ item.hotel.name }}</v-card-title>
+    <v-row align="center">
+      <v-col cols="12">
+        <v-card class="mx-auto" max-width="800" elevation="12">
+          <v-img
+            class="white--text align-end"
+            height="300px"
+            src="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
+          >
+            <v-card-title>
+              <div>
+                {{ item.hotel.name }}
+              </div>
+            </v-card-title>
           </v-img>
-          <v-card-subtitle class="pb-0">{{
-              item.hotel.rating
-          }} Stars</v-card-subtitle>
-          <v-card-text class="text--primary">
+          <v-rating
+            background-color="grey"
+            color="red lighten-3"
+            v-model="item.hotel.rating"
+            readonly
+          ></v-rating>
+          <v-card-text class="pb-0">
             <div>
               {{ hotelDescription.text }}
             </div>
           </v-card-text>
-          <v-card-text>
-            Address
-            <div>{{ hotelAddress.lines }} {{ hotelAddress.cityName }} {{ hotelAddress.stateCode }},
-              {{ hotelAddress.postalCode }} {{ hotelAddress.countryCode }}</div>
+          <v-card-text class="pb-0">
+            Address:
+            <div>
+              {{ addressLine }}, {{ hotelAddress.cityName }},
+              {{ hotelAddress.stateCode }} {{ hotelAddress.postalCode }},
+              {{ hotelAddress.countryCode }}.
+            </div>
           </v-card-text>
-          <v-card-text>
-            Amenities
-            <div>{{ hotelAmenities }}</div>
+          <v-card-text class="pb-0">
+            Contact:
+            <div>Phone: {{ contactPhone }}</div>
+            <div>Email: {{ contactEmail }}</div>
           </v-card-text>
-          <v-card-actions>
-            <v-btn color="orange" text> Share </v-btn>
-            <v-btn color="orange" text> Explore </v-btn>
-          </v-card-actions>
+
+          <v-expansion-panels focusable flat>
+            <v-expansion-panel>
+              <v-expansion-panel-header>Map</v-expansion-panel-header>
+              <v-expansion-panel-content class="center-padding">
+                <!-- map -->
+
+                <v-card class="mx-auto" mx-auto elevation-19>
+                  <l-map style="height: 300px" :zoom="zoom" :center="center">
+                    <l-tile-layer
+                      :url="url"
+                      :attribution="attribution"
+                    ></l-tile-layer>
+                    <l-marker :lat-lng="center">
+                      <l-popup> </l-popup>
+                    </l-marker>
+                  </l-map>
+                </v-card>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+            <v-expansion-panel>
+              <v-expansion-panel-header>Amenities</v-expansion-panel-header>
+              <v-expansion-panel-content
+                v-for="hotelAmenity in hotelAmenities"
+                :key="hotelAmenity"
+              >
+                {{ hotelAmenity }}
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </v-card>
       </v-col>
+
       <v-col cols="12" v-for="hotelOffer in hotelOffers" :key="hotelOffer.id">
-        <v-card class="mx-auto" max-width="600" elevation="12">
+        <v-card class="mx-auto" max-width="800" elevation="12">
           <v-card-title>
             <div>
               {{ hotelOffer.price.base }} {{ hotelOffer.price.currency }}
             </div>
             <v-spacer></v-spacer>
-            <div>
-              Check In: {{ hotelOffer.checkInDate }}
-            </div>
+            <div>Check In: {{ hotelOffer.checkInDate }}</div>
             <v-spacer></v-spacer>
-            <div>
-              Check Out: {{ hotelOffer.checkOutDate }}
-            </div>
+            <div>Check Out: {{ hotelOffer.checkOutDate }}</div>
           </v-card-title>
           <v-card-subtitle>
-            <div>
-              Habitación: {{ hotelOffer.room.description.text }}
-            </div>
+            <div>Habitación: {{ hotelOffer.room.description.text }}</div>
           </v-card-subtitle>
           <v-card-text>
-            <div>
-              Tipo de Cama: {{ hotelOffer.room.typeEstimated.bedType }}
-            </div>
-            <div>
-              Numero de camas: {{ hotelOffer.room.typeEstimated.beds }}
-            </div>
-            <div>
-              Adultos: {{ hotelOffer.guests.adults }}
-            </div>
+            <div>Tipo de Cama: {{ hotelOffer.room.typeEstimated.bedType }}</div>
+            <div>Numero de camas: {{ hotelOffer.room.typeEstimated.beds }}</div>
+            <div>Adultos: {{ hotelOffer.guests.adults }}</div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -67,55 +97,80 @@
 </template>
 <style>
 .center-padding {
-  padding-top: 30px;
+  padding-top: 50px;
+}
+.TextClass {
+  white-space: nowrap;
+  word-break: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mapis {
+  max-height: 360;
 }
 </style>
 <script>
-
 import axios from "axios";
+import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
 export default {
+  components: {
+    LMap,
+    LTileLayer,
+    LMarker,
+    LPopup,
+  },
   data() {
     return {
       item: [],
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      attribution:
+        'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+      zoom: 15,
+      center: [],
     };
   },
   created() {
-    if (!this.$route.params) {
+    if (!this.$route.params.id) {
       return;
     }
     var idHotel = this.$route.params.id[0];
-    console.log(idHotel);
     this.offerByHotelId(idHotel);
+    console.log(idHotel);
   },
   methods: {
     offerByHotelId(idHotel) {
       axios
         .get("/offerSearch", { params: { id: idHotel } })
         .then((res) => {
-          this.item = res.data.data;
-          this.hotelDescription = res.data.data.hotel.description;
-          this.hotelAddress = res.data.data.hotel.address;
-          this.hotelAmenities = res.data.data.hotel.amenities;
-          this.hotelOffers = res.data.data.offers;
-          this.hotelMedia = res.data.data.hotel.media;      
+          console.log(res);
+          this.item = res.data.result.data;
+          this.hotelDescription = res.data.result.data.hotel.description;
+          this.hotelAddress = res.data.result.data.hotel.address;
+          this.hotelAmenities = res.data.result.data.hotel.amenities;
+          this.hotelOffers = res.data.result.data.offers;
+          this.hotelMedia = res.data.result.data.hotel.media;
 
-          /* this.body = res.data.body; */
-          /* console.log(this.body); */
+          this.contactPhone = res.data.result.data.hotel.contact.phone;
+          this.contactEmail = res.data.result.data.hotel.contact.email;
+          this.contactFax = res.data.result.data.hotel.contact.fax;
 
-          //status codes
-          this.statusText = res.statusText;
-          this.statusCode = res.status;
+          this.center = [this.item.hotel.latitude, this.item.hotel.longitude];
 
-          console.log(this.item);
+          this.result = res.data.result;
+
+          console.log(this.result);
+          //iterate over address.lines
+          this.hotelAddress.lines.forEach((line) => {
+            this.addressLine = line;
+          });
+
+          //status code
+          this.statusCode = res.data.statusCode;
+
           console.log(this.hotelMedia);
-          console.log(this.hotelAmenities);
-          console.log(this.hotelOffers);
-          console.log(this.hotelAddress);
-
-
-
-          console.log(this.statusText, this.statusCode);
+          console.log(this.statusCode);
         })
+
         .catch((err) => {
           console.log(err);
         });
