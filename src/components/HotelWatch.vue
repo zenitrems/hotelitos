@@ -3,68 +3,58 @@
     <v-row align="center">
       <v-col cols="12">
         <v-card class="mx-auto" max-width="800" elevation="12">
-          <v-img
-            class="white--text align-end"
-            height="300px"
-            src="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
-          >
+          <v-img class="white--text align-end" height="300px" src="https://cdn.vuetifyjs.com/images/cards/docks.jpg">
             <v-card-title>
-              <div>
+              <div class="title">
                 {{ item.hotel.name }}
               </div>
             </v-card-title>
           </v-img>
-          <v-rating
-            background-color="grey"
-            color="red lighten-3"
-            v-model="item.hotel.rating"
-            readonly
-          ></v-rating>
+          <v-rating background-color="grey" color="red lighten-3" v-model="item.hotel.rating" readonly></v-rating>
           <v-card-text class="pb-0">
-            <div>
+            <div class="title">
+              Description
+            </div>
+            <div class="font-weight-medium">
               {{ hotelDescription.text }}
             </div>
           </v-card-text>
           <v-card-text class="pb-0">
-            Address:
-            <div>
+            <div class="title">
+              Address:
+            </div>
+            <div class="font-weight-medium">
               {{ addressLine }}, {{ hotelAddress.cityName }},
               {{ hotelAddress.stateCode }} {{ hotelAddress.postalCode }},
               {{ hotelAddress.countryCode }}.
             </div>
           </v-card-text>
-          <v-card-text class="pb-0">
-            Contact:
-            <div>Phone: {{ contactPhone }}</div>
-            <div>Email: {{ contactEmail }}</div>
+          <v-card-text>
+            <div class="title">
+              Contact:
+            </div>
+            <div class="font-weight-medium">Phone: {{ contactPhone }}</div>
+            <div class="font-weight-medium">Email: {{ contactEmail }}</div>
           </v-card-text>
-
+          <v-container>
+            <!-- map -->
+            <l-map style="height: 300px" :zoom="zoom" :center="center">
+              <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
+              <l-marker :lat-lng="center">
+                <l-popup>
+                  <div>{{ item.hotel.name }}</div>
+                </l-popup>
+              </l-marker>
+            </l-map>
+          </v-container>
           <v-expansion-panels focusable flat>
             <v-expansion-panel>
-              <v-expansion-panel-header>Map</v-expansion-panel-header>
-              <v-expansion-panel-content class="center-padding">
-                <!-- map -->
-
-                <v-card class="mx-auto" mx-auto elevation-19>
-                  <l-map style="height: 300px" :zoom="zoom" :center="center">
-                    <l-tile-layer
-                      :url="url"
-                      :attribution="attribution"
-                    ></l-tile-layer>
-                    <l-marker :lat-lng="center">
-                      <l-popup> </l-popup>
-                    </l-marker>
-                  </l-map>
-                </v-card>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-            <v-expansion-panel>
               <v-expansion-panel-header>Amenities</v-expansion-panel-header>
-              <v-expansion-panel-content
-                v-for="hotelAmenity in hotelAmenities"
-                :key="hotelAmenity"
-              >
-                {{ hotelAmenity }}
+              <v-expansion-panel-content class="text-lowercase" v-for="hotelAmenity in hotelAmenities"
+                :key="hotelAmenity">
+                <div>
+                  {{ hotelAmenity }}
+                </div>
               </v-expansion-panel-content>
             </v-expansion-panel>
           </v-expansion-panels>
@@ -96,15 +86,27 @@
   </v-container>
 </template>
 <style>
+ul#horizontal-list {
+  min-width: 696px;
+  list-style: none;
+  padding-top: 20px;
+}
+
+ul#horizontal-list li {
+  display: inline;
+}
+
 .center-padding {
   padding-top: 50px;
 }
+
 .TextClass {
   white-space: nowrap;
   word-break: normal;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .mapis {
   max-height: 360;
 }
@@ -125,7 +127,7 @@ export default {
       url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
         'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-      zoom: 15,
+      zoom: 16,
       center: [],
     };
   },
