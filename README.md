@@ -1,4 +1,4 @@
-# hotelitos is an hotel search engine using amadeus api.
+# hotelitos is an hotel search engine using amadeus api and vue.
 
 ## Project setup
 

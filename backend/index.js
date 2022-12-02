@@ -8,8 +8,9 @@ const app = express();
 app.use(morgan("dev"));
 app.use(cors());
 
-const { CLIENT_ID, CLIENT_SECRET } = require("./config");
+/* const { CLIENT_ID, CLIENT_SECRET } = require("./config"); */
 
+require("./config");
 app.use(bodyParser.json()); //json encoded bodies
 app.use(
   bodyParser.urlencoded({
@@ -26,7 +27,6 @@ var amadeus = new Amadeus({
 
 // Hotel name autocomplete for keyword 'keyyword' using  HOTEL_GDS category of search
 app.get("/search", async function (req, res) {
-  console.log(req.query);
   var keywords = req.query.keyword;
   amadeus.referenceData.locations.hotel
     .get({
@@ -38,6 +38,7 @@ app.get("/search", async function (req, res) {
       res.send(response.result);
     })
     .catch(function (err) {
+      res.send(err);
       console.error(err);
     });
 });
@@ -54,10 +55,10 @@ app.get("/offerSearch", (req, res) => {
       view: "FULL",
     })
     .then(function (response) {
-      console.log(response);
       res.send(response);
     })
     .catch(function (err) {
+      res.send(err);
       console.error(err);
     });
 });

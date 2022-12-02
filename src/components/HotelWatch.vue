@@ -3,46 +3,56 @@
     <v-row align="center">
       <v-col cols="12">
         <v-card class="mx-auto" max-width="800" elevation="12">
-          <v-img class="white--text align-end" height="300px" src="https://cdn.vuetifyjs.com/images/cards/docks.jpg">
+          <v-img
+            class="white--text align-end"
+            height="300px"
+            src="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
+          >
             <v-card-title>
               <div class="title">
-                {{ item.hotel.name }}
+                {{ hotelName }}
               </div>
             </v-card-title>
           </v-img>
-          <v-rating background-color="grey" color="red lighten-3" v-model="item.hotel.rating" readonly></v-rating>
+          <v-rating
+            background-color="grey"
+            color="red lighten-3"
+            v-model="hotelRating"
+            readonly
+          ></v-rating>
           <v-card-text class="pb-0">
-            <div class="title">
-              Description
-            </div>
+            <div class="title">Description</div>
             <div class="font-weight-medium">
               {{ hotelDescription.text }}
             </div>
           </v-card-text>
           <v-card-text class="pb-0">
-            <div class="title">
-              Address:
-            </div>
+            <div class="title">Address:</div>
             <div class="font-weight-medium">
-              {{ addressLine }}, {{ hotelAddress.cityName }},
+              {{ hotelAddressLine }}, {{ hotelAddress.cityName }},
               {{ hotelAddress.stateCode }} {{ hotelAddress.postalCode }},
               {{ hotelAddress.countryCode }}.
             </div>
           </v-card-text>
           <v-card-text>
-            <div class="title">
-              Contact:
+            <div class="title">Contact:</div>
+            <div class="font-weight-medium">
+              Phone: {{ hotelContact.phone }}
             </div>
-            <div class="font-weight-medium">Phone: {{ contactPhone }}</div>
-            <div class="font-weight-medium">Email: {{ contactEmail }}</div>
+            <div class="font-weight-medium">
+              Email: {{ hotelContact.email }}
+            </div>
           </v-card-text>
           <v-container>
             <!-- map -->
-            <l-map style="height: 300px" :zoom="zoom" :center="center">
-              <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
-              <l-marker :lat-lng="center">
+            <l-map style="height: 300px" :zoom="zoom" :center="hotelGeo">
+              <l-tile-layer
+                :url="url"
+                :attribution="attribution"
+              ></l-tile-layer>
+              <l-marker :lat-lng="hotelGeo">
                 <l-popup>
-                  <div>{{ item.hotel.name }}</div>
+                  <div>{{ hotelName }}</div>
                 </l-popup>
               </l-marker>
             </l-map>
@@ -50,8 +60,11 @@
           <v-expansion-panels focusable flat>
             <v-expansion-panel>
               <v-expansion-panel-header>Amenities</v-expansion-panel-header>
-              <v-expansion-panel-content class="text-lowercase" v-for="hotelAmenity in hotelAmenities"
-                :key="hotelAmenity">
+              <v-expansion-panel-content
+                class="text-lowercase"
+                v-for="hotelAmenity in hotelAmenities"
+                :key="hotelAmenity"
+              >
                 <div>
                   {{ hotelAmenity }}
                 </div>
@@ -123,12 +136,19 @@ export default {
   },
   data() {
     return {
-      item: [],
+      hotelName: "",
+      hotelRating: 0,
+      hotelDescription: "",
+      hotelAddressLine: "",
+      hotelAddress: "",
+      hotelContact: "",
+      hotelAmenities: "",
+      hotelGeo: [0, 0],
+      hotelOffers: [],
       url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
         'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
       zoom: 16,
-      center: [],
     };
   },
   created() {
@@ -145,32 +165,29 @@ export default {
         .get("/offerSearch", { params: { id: idHotel } })
         .then((res) => {
           console.log(res);
-          this.item = res.data.result.data;
-          this.hotelDescription = res.data.result.data.hotel.description;
-          this.hotelAddress = res.data.result.data.hotel.address;
-          this.hotelAmenities = res.data.result.data.hotel.amenities;
-          this.hotelOffers = res.data.result.data.offers;
-          this.hotelMedia = res.data.result.data.hotel.media;
+          let resData = res.data.result.errors;
 
-          this.contactPhone = res.data.result.data.hotel.contact.phone;
-          this.contactEmail = res.data.result.data.hotel.contact.email;
-          this.contactFax = res.data.result.data.hotel.contact.fax;
+          if (!resData) {
+            let hotelData = res.data.result.data.hotel;
+            let hotelOffer = res.data.result.data.offers;
 
-          this.center = [this.item.hotel.latitude, this.item.hotel.longitude];
+            this.hotelName = hotelData.name;
+            this.hotelRating = parseInt(hotelData.rating);
+            this.hotelDescription = hotelData.description;
+            this.hotelContact = hotelData.contact;
+            this.hotelAddress = hotelData.address;
+            this.hotelGeo = [hotelData.latitude, hotelData.longitude];
+            this.hotelAmenities = hotelData.amenities;
+            this.hotelMedia = hotelData.media;
+            this.hotelOffers = hotelOffer;
 
-          this.result = res.data.result;
-
-          console.log(this.result);
-          //iterate over address.lines
-          this.hotelAddress.lines.forEach((line) => {
-            this.addressLine = line;
-          });
-
-          //status code
-          this.statusCode = res.data.statusCode;
-
-          console.log(this.hotelMedia);
-          console.log(this.statusCode);
+            //iterate over address.lines
+            this.hotelAddress.lines.forEach((line) => {
+              this.hotelAddressLine = line;
+            });
+          } else {
+            console.log(resData);
+          }
         })
 
         .catch((err) => {
