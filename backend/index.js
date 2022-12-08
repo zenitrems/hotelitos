@@ -46,7 +46,6 @@ app.get("/search", async function (req, res) {
 app.get("/offerSearch", (req, res) => {
   // Get list of available offers in specific hotels by hotel id
   var id = req.query.id;
-  console.log(id);
   amadeus.shopping.hotelOffersByHotel
     .get({
       hotelId: id,
@@ -59,6 +58,22 @@ app.get("/offerSearch", (req, res) => {
     })
     .catch(function (err) {
       res.send(err);
+      console.error(err);
+    });
+});
+
+app.get("/hotelSearch", (req, res) => {
+  var idHotel = req.query.byHotel;
+  console.log(idHotel);
+  amadeus.referenceData.locations.hotels.byHotels
+    .get({
+      hotelIds: idHotel,
+    })
+    .then(function (response) {
+      res.send(response);
+      console.log(response);
+    })
+    .catch(function (err) {
       console.error(err);
     });
 });
