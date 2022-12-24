@@ -1,5 +1,5 @@
 <template>
-  <v-row align="center" justify="center" class="center-padding">
+  <v-row align="center" justify="center" class="center-padding" fill-height>
     <v-col cols="12" md="6" sm="6">
       <v-card class="mx-auto" max-width="800" elevation="12">
         <v-img
@@ -66,41 +66,34 @@
       </v-card>
     </v-col>
     <v-col cols="12" sm="6" md="6">
-      <v-virtual-scroll :items="hotelOffers" :item-height="200" height="800">
-        <div v-for="hotelOffer in hotelOffers" :key="hotelOffer.id">
-          <v-card
-            class="mx-auto mb-5"
-            max-width="800"
-            elevation="12"
-            cols="12"
-            sm="6"
-            md="8"
-            
-          >
-            <v-card-title>
-              <div>
-                {{ hotelOffer.price.base }} {{ hotelOffer.price.currency }}
-              </div>
-              <v-spacer></v-spacer>
-              <div>Check In: {{ hotelOffer.checkInDate }}</div>
-              <v-spacer></v-spacer>
-              <div>Check Out: {{ hotelOffer.checkOutDate }}</div>
-            </v-card-title>
-            <v-card-subtitle>
-              <div>Habitación: {{ hotelOffer.room.description.text }}</div>
-            </v-card-subtitle>
-            <v-card-text>
-              <div>
-                Tipo de Cama: {{ hotelOffer.room.typeEstimated.bedType }}
-              </div>
-              <div>
-                Numero de camas: {{ hotelOffer.room.typeEstimated.beds }}
-              </div>
-              <div>Adultos: {{ hotelOffer.guests.adults }}</div>
-            </v-card-text>
-          </v-card>
-        </div>
-      </v-virtual-scroll>
+      <div v-for="hotelOffer in hotelOffers" :key="hotelOffer.id">
+        <v-card
+          class="mx-auto mb-5"
+          max-width="800"
+          elevation="12"
+          cols="12"
+          sm="6"
+          md="8"
+        >
+          <v-card-title>
+            <div>
+              {{ hotelOffer.price.base }} {{ hotelOffer.price.currency }}
+            </div>
+            <v-spacer></v-spacer>
+            <div>Check In: {{ hotelOffer.checkInDate }}</div>
+            <v-spacer></v-spacer>
+            <div>Check Out: {{ hotelOffer.checkOutDate }}</div>
+          </v-card-title>
+          <v-card-subtitle>
+            <div>Habitación: {{ hotelOffer.room.description.text }}</div>
+          </v-card-subtitle>
+          <v-card-text>
+            <div>Tipo de Cama: {{ hotelOffer.room.typeEstimated.bedType }}</div>
+            <div>Numero de camas: {{ hotelOffer.room.typeEstimated.beds }}</div>
+            <div>Adultos: {{ hotelOffer.guests.adults }}</div>
+          </v-card-text>
+        </v-card>
+      </div>
     </v-col>
   </v-row>
 </template>
@@ -149,20 +142,32 @@ export default {
     };
   },
   created() {
-    if (!this.$route.params.id) {
+    let routerParams = this.$route.params;
+    if (!routerParams) {
       return;
     }
-    let idHotel = this.$route.params.id[0];
-    this.getHotelById(idHotel);
-    this.offerByHotelId(idHotel);
-    console.log(idHotel);
+    console.log(routerParams);
+    let inDate = routerParams.dates[0];
+    let outDate = routerParams.dates[1];
+    const today = new Date();
+    const date =
+      today.getFullYear() +
+      "-" +
+      (today.getMonth() + 1) +
+      "-" +
+      today.getDate();
+    console.log(date);
+
+    this.getHotelById(routerParams.id[0]);
+    this.offerByHotelId(routerParams.id[0], inDate, outDate);
   },
   computed: {},
-
   methods: {
-    offerByHotelId(idHotel) {
+    offerByHotelId(idHotel, inDate, outDate) {
       axios
-        .get("/offerSearch", { params: { id: idHotel } })
+        .get("/offerSearch", {
+          params: { id: idHotel, in: inDate, out: outDate },
+        })
         .then((res) => {
           console.log(res);
           let resDataErrors = res.data.result.errors;

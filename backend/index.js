@@ -45,10 +45,16 @@ app.get("/search", async function (req, res) {
 
 app.get("/offerSearch", (req, res) => {
   // Get list of available offers in specific hotels by hotel id
+  console.log(req.query);
   var id = req.query.id;
+  var inDate = req.query.in;
+  var outDate = req.query.out;
   amadeus.shopping.hotelOffersByHotel
     .get({
       hotelId: id,
+      checkInDate: inDate,
+      checkOutDate: outDate,
+      includeClosed: true,
       adults: "1",
       lang: "ES",
       view: "FULL",
