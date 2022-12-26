@@ -25,7 +25,12 @@ var amadeus = new Amadeus({
   clientSecret: "sD6bReG5iIxVXU03",
 });
 
-// Hotel name autocomplete for keyword 'keyyword' using  HOTEL_GDS category of search
+
+/* Hotel name autocomplete for keyword 'keyyword' using  HOTEL_GDS category of search
+477	NOT FOUND
+1797	INVALID FORMAT
+572	INVALID LENGTH
+32171	MANDATORY DATA MISSING */
 app.get("/search", async function (req, res) {
   var keywords = req.query.keyword;
   amadeus.referenceData.locations.hotel
@@ -43,8 +48,32 @@ app.get("/search", async function (req, res) {
     });
 });
 
+/* Get list of available offers in specific hotels by hotel id
+  BAD REQUEST CODES
+  23	PASSENGER TYPE NOT SUPPORTED
+  61	INVALID CURRENCY CODE
+  137	INVALID ADULTS OCCUPANCY REQUESTED
+  145	DURATION PERIOD OR DATES INCORRECT
+  195	SERVICE RESTRICTION
+  249	INVALID RATE CODE
+  377	MAX STAY DURATION IS EXCEEDED
+  381	INVALID CHECK - IN DATE
+  382	INVALID CHECK - OUT DATE
+  383	INVALID CITY CODE
+  392	INVALID HOTEL CODE
+  397	INVALID NUMBER OF ADULTS
+  400	INVALID PROPERTY CODE
+  404	CHECK_OUT DATE MUST BE FURTHER IN THE FUTURE THAN CHECK - IN DATE
+  424	NO HOTELS FOUND WHICH MATCH THIS INPUT
+  431	CHECK - OUT DATE IS TOO FAR IN THE FUTURE THAN CHECK - IN DATE
+  424	NO HOTELS FOUND WHICH MATCH THIS INPUT
+  431	CHECK - OUT DATE IS TOO FAR IN THE FUTURE
+  450	INVALID PROVIDER RESPONSE
+  451	INVALID CREDENTIALS
+  562	RESTRICTED ACCESS FOR THE REQUESTED RATES AND CHAINS
+  784	PROVIDER TIME OUT
+  790	RATE SECURITY NOT LOADED */
 app.get("/offerSearch", (req, res) => {
-  // Get list of available offers in specific hotels by hotel id
   console.log(req.query);
   var id = req.query.id;
   var inDate = req.query.in;
@@ -58,6 +87,7 @@ app.get("/offerSearch", (req, res) => {
       adults: "1",
       lang: "ES",
       view: "FULL",
+      currency: "MXN",
     })
     .then(function (response) {
       res.send(response);

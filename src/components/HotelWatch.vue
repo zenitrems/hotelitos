@@ -2,23 +2,14 @@
   <v-row align="center" justify="center" class="center-padding" fill-height>
     <v-col cols="12" md="6" sm="6">
       <v-card class="mx-auto" max-width="800" elevation="12">
-        <v-img
-          class="white--text align-end"
-          height="300px"
-          src="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
-        >
+        <v-img class="white--text align-end" max-height="300" contain :src="hotelMedia.uri">
           <v-card-title>
-            <div class="title">
+            <div class="title" style="color:black">
               {{ hotelName }}
             </div>
           </v-card-title>
         </v-img>
-        <v-rating
-          background-color="grey"
-          color="red lighten-3"
-          v-model="hotelRating"
-          readonly
-        ></v-rating>
+        <v-rating background-color="grey" color="red lighten-3" v-model="hotelRating" readonly></v-rating>
         <v-card-text class="pb-0">
           <div class="title">Description</div>
           <div class="font-weight-medium">
@@ -52,11 +43,8 @@
         <v-expansion-panels focusable flat>
           <v-expansion-panel>
             <v-expansion-panel-header>Amenities</v-expansion-panel-header>
-            <v-expansion-panel-content
-              class="text-lowercase"
-              v-for="hotelAmenity in hotelAmenities"
-              :key="hotelAmenity"
-            >
+            <v-expansion-panel-content class="text-lowercase" v-for="hotelAmenity in hotelAmenities"
+              :key="hotelAmenity">
               <div>
                 {{ hotelAmenity }}
               </div>
@@ -67,22 +55,21 @@
     </v-col>
     <v-col cols="12" sm="6" md="6">
       <div v-for="hotelOffer in hotelOffers" :key="hotelOffer.id">
-        <v-card
-          class="mx-auto mb-5"
-          max-width="800"
-          elevation="12"
-          cols="12"
-          sm="6"
-          md="8"
-        >
+        <v-card class="mx-auto mb-5" max-width="800" elevation="12" cols="12" sm="6" md="8">
           <v-card-title>
             <div>
-              {{ hotelOffer.price.base }} {{ hotelOffer.price.currency }}
+              Base Price: {{ hotelOffer.price.base }} {{ hotelOffer.price.currency }}
+            </div>
+            <v-spacer></v-spacer>
+            <div>
+              Total Price:
+              {{ hotelOffer.price.total }}
             </div>
             <v-spacer></v-spacer>
             <div>Check In: {{ hotelOffer.checkInDate }}</div>
             <v-spacer></v-spacer>
             <div>Check Out: {{ hotelOffer.checkOutDate }}</div>
+            <v-spacer></v-spacer>
           </v-card-title>
           <v-card-subtitle>
             <div>Habitación: {{ hotelOffer.room.description.text }}</div>
@@ -91,6 +78,12 @@
             <div>Tipo de Cama: {{ hotelOffer.room.typeEstimated.bedType }}</div>
             <div>Numero de camas: {{ hotelOffer.room.typeEstimated.beds }}</div>
             <div>Adultos: {{ hotelOffer.guests.adults }}</div>
+          </v-card-text>
+          <v-card-text>
+            <div>{{ hotelOffer.policies }}</div>
+            <v-spacer></v-spacer>
+            <div>ID: {{ hotelOffer.id }}</div>
+
           </v-card-text>
         </v-card>
       </div>
@@ -135,6 +128,7 @@ export default {
       hotelGeo: [0, 0],
       hotelOffers: [],
       hotelOffer: [],
+      hotelMedia: [],
       url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
         'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
@@ -185,6 +179,8 @@ export default {
             this.hotelAmenities = hotelData.amenities;
             this.hotelMedia = hotelData.media;
             this.hotelOffers = hotelOffer;
+
+            this.hotelMedia = hotelData.media[0];
 
             //iterate over address.lines
             this.hotelAddress.lines.forEach((line) => {
