@@ -1,14 +1,14 @@
 <template>
-  <v-row align="center" justify="center" class="center-padding" fill-height>
+  <v-row align="center" justify="center" class="center-padding">
     <v-col cols="12" md="6" sm="6">
       <v-card class="mx-auto" max-width="800" elevation="12">
         <v-img class="white--text align-end" max-height="300" contain :src="hotelMedia.uri">
-          <v-card-title>
-            <div class="title" style="color:black">
-              {{ hotelName }}
-            </div>
-          </v-card-title>
         </v-img>
+        <v-card-title>
+          <div class="title" style="color:black">
+            {{ hotelName }}
+          </div>
+        </v-card-title>
         <v-rating background-color="grey" color="red lighten-3" v-model="hotelRating" readonly></v-rating>
         <v-card-text class="pb-0">
           <div class="title">Description</div>
@@ -186,7 +186,6 @@ export default {
             this.hotelAddress.lines.forEach((line) => {
               this.hotelAddressLine = line;
             });
-
             console.log(this.hotelOffers);
           } else {
             console.log(resDataErrors);
@@ -207,7 +206,7 @@ export default {
 
           this.hotelName = dataHotel.name;
           this.hotelId = dataHotel.id;
-          console.log(this.hotelName);
+          this.hotelGeo = [dataHotel.geoCode.latitude, dataHotel.geoCode.longitude];
         })
         .catch((err) => {
           console.log(err);

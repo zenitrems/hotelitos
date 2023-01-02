@@ -1,43 +1,21 @@
 <template>
-  <v-container justify-center fluid fill-height id="BackImg" elevation-24>
-    <v-card class="background-card-color" elevation-24 dark>
-      <v-container fluid>
-        <v-row justify="center" fill-height>
-          <v-col cols="12">
-            <v-autocomplete
-              v-model="searched"
-              :items="items"
-              :loading="isLoading"
-              :search-input.sync="search"
-              item-text="name"
-              item-value="id"
-              label="Busca un Hotel"
-              return-object
-              loader-height="4"
-              hidde-no-data
-              cache-items
-              solo
-              dark
-            >
+  <v-container class="text-center" justify-center fill-height id="BackImg" elevation-24>
+    <v-card class="background-card-color" elevation-24 dark max-height="800">
+      <v-row justify="center" align="center">
+        <v-col cols="12" sm="4" md="8">
+          <v-container>
+            <v-autocomplete v-model="searched" :items="items" :loading="isLoading" :search-input.sync="search"
+              item-text="name" item-value="id" label="Busca un Hotel" return-object loader-height="4" hidde-no-data
+              cache-items solo dark>
             </v-autocomplete>
-          </v-col>
-          <v-col cols="8">
-            <v-dialog
-              ref="dialog"
-              v-model="modal"
-              :return-value.sync="dates"
-              persistent
-              width="290px"
-            >
+          </v-container>
+        </v-col>
+        <v-col cols="8" sm="6" md="6">
+          <v-container>
+            <v-dialog ref="dialog" v-model="modal" :return-value.sync="dates" persistent width="290px">
               <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="dates"
-                  label="Selecciona un rango de fechas"
-                  prepend-icon="calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
+                <v-text-field v-model="dateRangeText" label="Selecciona un rango de fechas" prepend-icon="calendar"
+                  readonly v-bind="attrs" v-on="on"></v-text-field>
               </template>
               <v-date-picker v-model="dates" scrollable range dark>
                 <v-btn text color="primary" @click="modal = false">
@@ -48,18 +26,14 @@
                 </v-btn>
               </v-date-picker>
             </v-dialog>
-          </v-col>
-          <v-col cols="2">
-            <v-container grid-list-md>
-              <v-btn
-                @click="hotelSearched(searched.hotelIds, dates)"
-                color="blue"
-                >Continuar</v-btn
-              >
-            </v-container>
-          </v-col>
-        </v-row>
-      </v-container>
+          </v-container>
+        </v-col>
+        <v-col cols="8" md="4" sm="4">
+          <v-container>
+            <v-btn @click="hotelSearched(searched.hotelIds, dates)" color="gray">Continuar</v-btn>
+          </v-container>
+        </v-col>
+      </v-row>
     </v-card>
   </v-container>
 </template>
@@ -70,6 +44,7 @@
   background-repeat: no-repeat;
   background-position: center;
 }
+
 .background-card-color {
   background-color: rgba(2, 3, 19, 0.705) !important;
 }

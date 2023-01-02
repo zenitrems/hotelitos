@@ -8,7 +8,8 @@ const app = express();
 app.use(morgan("dev"));
 app.use(cors());
 
-/* const { CLIENT_ID, CLIENT_SECRET } = require("./config"); */
+
+
 
 require("./config");
 app.use(bodyParser.json()); //json encoded bodies
@@ -17,12 +18,18 @@ app.use(
     extended: true,
   })
 );
+/* 
+ var { CLIENT_ID, CLIENT_SECRET } = require("./config"); 
+console.log(CLIENT_ID, CLIENT_SECRET) */
 
 //amadeus api
 var Amadeus = require("amadeus");
 var amadeus = new Amadeus({
   clientId: "j4dlDKxrpBWV3AgiJpFfwR5ZAA8iUbpm",
   clientSecret: "sD6bReG5iIxVXU03",
+  /*   clientId: CLIENT_ID,
+    clientSecret: CLIENT_SECRET, */
+  logLevel: 'warn',
 });
 
 
@@ -36,7 +43,7 @@ app.get("/search", async function (req, res) {
   amadeus.referenceData.locations.hotel
     .get({
       keyword: keywords,
-      subType: "HOTEL_GDS",
+      subType: "HOTEL_GDS", //HOTEL_LEISURE FOR AGGREGATORS
       lang: "ES",
     })
     .then(function (response) {
