@@ -1,44 +1,40 @@
+//dotenv is a library to load environment variables from a .env file
+require("dotenv").config();
+//cors is a middleware to allow cross origin requests
 const cors = require("cors");
-const morgan = require("morgan");
+//socket.io is a library to create a websocket
 const socket = require("socket.io");
-const bodyParser = require("body-parser");
+//express is a framework to create a server
 const express = require("express");
 const app = express();
+//morgan is a logger middleware
+const morgan = require("morgan");
+//body parser is a middleware to parse the body of the request
+const bodyParser = require("body-parser");
 
-app.use(morgan("dev"));
-app.use(cors());
 
-
-
-
-require("./config");
-app.use(bodyParser.json()); //json encoded bodies
 app.use(
+  cors(),
+  morgan("dev"),
+  bodyParser.json(),
   bodyParser.urlencoded({
     extended: true,
   })
 );
-/* 
- var { CLIENT_ID, CLIENT_SECRET } = require("./config"); 
-console.log(CLIENT_ID, CLIENT_SECRET) */
 
 //amadeus api
 var Amadeus = require("amadeus");
 var amadeus = new Amadeus({
-  clientId: "j4dlDKxrpBWV3AgiJpFfwR5ZAA8iUbpm",
-  clientSecret: "sD6bReG5iIxVXU03",
-  /*   clientId: CLIENT_ID,
-    clientSecret: CLIENT_SECRET, */
-  logLevel: 'warn',
+  clientId: process.env.AMADEUS_CLIENT_ID,
+  clientSecret: process.env.AMADEUS_CLIENT_SECRET,
 });
-
 
 /* Hotel name autocomplete for keyword 'keyyword' using  HOTEL_GDS category of search
 477	NOT FOUND
 1797	INVALID FORMAT
 572	INVALID LENGTH
 32171	MANDATORY DATA MISSING */
-app.get("/search", async function (req, res) {
+app.get("/search", function (req, res) {
   var keywords = req.query.keyword;
   amadeus.referenceData.locations.hotel
     .get({
@@ -49,9 +45,9 @@ app.get("/search", async function (req, res) {
     .then(function (response) {
       res.send(response.result);
     })
-    .catch(function (err) {
-      res.send(err);
-      console.error(err);
+    .catch(function (responseError) {
+      console.log("Amadeus API error: ", responseError);
+      res.send(responseError);
     });
 });
 
@@ -98,10 +94,11 @@ app.get("/offerSearch", (req, res) => {
     })
     .then(function (response) {
       res.send(response);
+      res.send(response.result);
     })
-    .catch(function (err) {
-      res.send(err);
-      console.error(err);
+    .catch(function (responseError) {
+      console.log("Amadeus API error: ", responseError);
+      res.send(responseError);
     });
 });
 
@@ -116,8 +113,9 @@ app.get("/hotelSearch", (req, res) => {
       res.send(response);
       console.log(response);
     })
-    .catch(function (err) {
-      console.error(err);
+    .catch(function (responseError) {
+      console.log("Amadeus API error: ", responseError);
+      res.send(responseError);
     });
 });
 

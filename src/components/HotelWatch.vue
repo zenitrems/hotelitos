@@ -182,7 +182,7 @@ export default {
 
             this.hotelMedia = hotelData.media[0];
 
-            //iterate over address.lines
+            //iterate over address.lines 
             this.hotelAddress.lines.forEach((line) => {
               this.hotelAddressLine = line;
             });

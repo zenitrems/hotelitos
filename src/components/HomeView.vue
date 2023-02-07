@@ -1,21 +1,51 @@
 <template>
-  <v-container class="text-center" justify-center fill-height id="BackImg" elevation-24>
+  <v-container
+    class="text-center"
+    justify-center
+    fill-height
+    id="BackImg"
+    elevation-24
+  >
     <v-card class="background-card-color" elevation-24 dark max-height="800">
       <v-row justify="center" align="center">
         <v-col cols="12" sm="4" md="8">
           <v-container>
-            <v-autocomplete v-model="searched" :items="items" :loading="isLoading" :search-input.sync="search"
-              item-text="name" item-value="id" label="Busca un Hotel" return-object loader-height="4" hidde-no-data
-              cache-items solo dark>
+            <v-autocomplete
+              v-model="searched"
+              :items="items"
+              :loading="isLoading"
+              :search-input.sync="search"
+              item-text="name"
+              item-value="id"
+              label="Busca un Hotel"
+              return-object
+              loader-height="4"
+              hidde-no-data
+              cache-items
+              solo
+              dark
+            >
             </v-autocomplete>
           </v-container>
         </v-col>
         <v-col cols="8" sm="6" md="6">
           <v-container>
-            <v-dialog ref="dialog" v-model="modal" :return-value.sync="dates" persistent width="290px">
+            <v-dialog
+              ref="dialog"
+              v-model="modal"
+              :return-value.sync="dates"
+              persistent
+              width="290px"
+            >
               <template v-slot:activator="{ on, attrs }">
-                <v-text-field v-model="dateRangeText" label="Selecciona un rango de fechas" prepend-icon="calendar"
-                  readonly v-bind="attrs" v-on="on"></v-text-field>
+                <v-text-field
+                  v-model="dateRangeText"
+                  label="Selecciona un rango de fechas"
+                  prepend-icon="calendar"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
               </template>
               <v-date-picker v-model="dates" scrollable range dark>
                 <v-btn text color="primary" @click="modal = false">
@@ -30,7 +60,9 @@
         </v-col>
         <v-col cols="8" md="4" sm="4">
           <v-container>
-            <v-btn @click="hotelSearched(searched.hotelIds, dates)" color="gray">Continuar</v-btn>
+            <v-btn @click="hotelSearched(searched.hotelIds, dates)" color="gray"
+              >Continuar</v-btn
+            >
           </v-container>
         </v-col>
       </v-row>
@@ -50,6 +82,7 @@
 }
 </style>
 <script>
+//axios is a promise based HTTP client for the browser and node.js
 import axios from "axios";
 export default {
   data() {
@@ -63,10 +96,10 @@ export default {
       dates: ["", ""],
     };
   },
-
   watch: {
+    // watch for changes in the search query
     search(val) {
-      // Items have already been loaded
+      // if the value is the same as before, do nothing
       if (!val) {
         return;
       }
@@ -76,6 +109,7 @@ export default {
     },
   },
   computed: {
+    // return the date range text
     dateRangeText() {
       return this.dates.join(" ~ ");
     },
@@ -83,10 +117,10 @@ export default {
   methods: {
     //debounce search query to avoid spamming the server
     searchDebounced() {
-      // cancel pending call
+      //clear previous timeout
       clearTimeout(this._timerId);
       this.isLoading = true;
-      //delay new call
+      //set new timeout
       this._timerId = setTimeout(() => {
         axios
           .get("/search", { params: { keyword: this.search } })
@@ -100,6 +134,7 @@ export default {
             console.log(err);
             this.isLoading = false;
           });
+        //set timeout to 850ms
       }, 850);
     },
     hotelSearched() {
