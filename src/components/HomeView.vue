@@ -122,6 +122,7 @@ export default {
       this.isLoading = true;
       //set new timeout
       this._timerId = setTimeout(() => {
+        //get hotels by keyword
         axios
           .get("/search", { params: { keyword: this.search } })
           .then((res) => {

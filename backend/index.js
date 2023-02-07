@@ -12,7 +12,7 @@ const morgan = require("morgan");
 //body parser is a middleware to parse the body of the request
 const bodyParser = require("body-parser");
 
-
+//initialize
 app.use(
   cors(),
   morgan("dev"),
@@ -81,9 +81,9 @@ app.get("/offerSearch", (req, res) => {
   var id = req.query.id;
   var inDate = req.query.in;
   var outDate = req.query.out;
-  amadeus.shopping.hotelOffersByHotel
+  amadeus.shopping.hotelOffersSearch
     .get({
-      hotelId: id,
+      hotelIds: id,
       checkInDate: inDate,
       checkOutDate: outDate,
       includeClosed: true,
@@ -93,7 +93,6 @@ app.get("/offerSearch", (req, res) => {
       currency: "MXN",
     })
     .then(function (response) {
-      res.send(response);
       res.send(response.result);
     })
     .catch(function (responseError) {
@@ -110,7 +109,7 @@ app.get("/hotelSearch", (req, res) => {
       hotelIds: idHotel,
     })
     .then(function (response) {
-      res.send(response);
+      res.send(response.result);
       console.log(response);
     })
     .catch(function (responseError) {
