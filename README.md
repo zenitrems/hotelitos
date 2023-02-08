@@ -11,12 +11,9 @@ npm install
 ```
 npm run serve
 ```
+in /backend/.env file
 
-#### TODO
-
-- Fetch prices, offers. :white_check_mark:
-- Hotel list view in cards.
-- Search by date, adults, kids, etc.
-- Reservation View.
-- Apply styles to uppercase letters and remove symbols.
-- Apply redirections and handle errors.
+NODE_ENV:
+PORT:
+AMADEUS_CLIENT_ID:
+AMADEUS_CLIENT_SECRET:
