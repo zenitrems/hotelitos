@@ -35,19 +35,18 @@ var amadeus = new Amadeus({
 572	INVALID LENGTH
 32171	MANDATORY DATA MISSING */
 app.get("/search", function (req, res) {
-  var keywords = req.query.keyword;
   amadeus.referenceData.locations.hotel
     .get({
-      keyword: keywords,
-      subType: "HOTEL_GDS", //HOTEL_LEISURE FOR AGGREGATORS
-      lang: "ES",
+      keyword: req.query.keyword,
+      subType: "HOTEL_GDS", //'HOTEL_LEISURE'  FOR AGGREGATORS
+      lang: "EN",
     })
     .then(function (response) {
       res.send(response.result);
     })
     .catch(function (responseError) {
-      console.log("Amadeus API error: ", responseError);
-      res.send(responseError);
+      console.log(responseError.description);
+      res.send(responseError.description);
     });
 });
 
@@ -77,89 +76,62 @@ app.get("/search", function (req, res) {
   784	PROVIDER TIME OUT
   790	RATE SECURITY NOT LOADED */
 app.get("/offerSearch", (req, res) => {
-  console.log(req.query);
-  var id = req.query.id;
-  var inDate = req.query.in;
-  var outDate = req.query.out;
   amadeus.shopping.hotelOffersSearch
     .get({
-      hotelIds: id,
-      checkInDate: inDate,
-      checkOutDate: outDate,
-      includeClosed: true,
-      adults: "1",
-      lang: "ES",
+      hotelIds: req.query.hotelId,
+      adults: req.query.adults,
+      checkInDate: req.query.in,
+      checkOutDate: req.query.out,
+      includeClosed: false,
+      bestRateOnly: false,
+      lang: "EN",
       view: "FULL",
-      currency: "MXN",
+      currency: "USD",
     })
     .then(function (response) {
       res.send(response.result);
     })
     .catch(function (responseError) {
-      console.log("Amadeus API error: ", responseError);
-      res.send(responseError);
+      console.log(responseError.description);
+      res.send(responseError.description);
+    });
+});
+
+app.get("/offerById", (req, res) => {
+  amadeus.shopping
+    .hotelOfferSearch(req.query.offerId)
+    .get({
+      offerId : req.query.offerId,
+      lang: "EN",
+    })
+    .then(function (response) {
+      res.send(response.result);
+    })
+    .catch(function (responseError) {
+      console.log(responseError.description);
+      res.send(responseError.description);
     });
 });
 
 app.get("/hotelSearch", (req, res) => {
-  var idHotel = req.query.byHotel;
-  console.log(idHotel);
+  var hotelId = req.query.hotelId;
   amadeus.referenceData.locations.hotels.byHotels
     .get({
-      hotelIds: idHotel,
+      hotelIds: hotelId,
     })
     .then(function (response) {
       res.send(response.result);
-      console.log(response);
     })
     .catch(function (responseError) {
-      console.log("Amadeus API error: ", responseError);
-      res.send(responseError);
+      console.log(responseError.description);
+      res.send(responseError.description);
     });
 });
 
-/* app.post("/date", async function (req, res) {
-  console.log(req.body);
-  departure = req.body.departure;
-  arrival = req.body.arrival;
-  locationDeparture = req.body.locationDeparture;
-  locationArrival = req.body.locationArrival;
-  const response = await amadeus.shopping.flightOffersSearch
-    .get({
-      originLocationCode: locationDeparture,
-      destinationLocationCode: locationArrival,
-      departureDate: departure,
-      adults: "1",
-    })
-    .catch((err) => console.log(err));
-  try {
-    await res.json(JSON.parse(response.body));
-  } catch (err) {
-    await res.json(err);
-  }
-}); */
-
-// List hotels by city icao
-/* app.get("/list", async function (req, res) {
-  console.log(req.query);
-  icaoCode = req.query.icaoCode;
-  const response = await amadeus.referenceData.locations.hotels.byCity
-    .get({
-      cityCode: icaoCode,
-      radius: "30",
-    })
-    .catch((x) => console.log(x));
-  try {
-    await res.json(JSON.parse(response.body));
-  } catch (err) {
-    await res.json(err);
-  }
-}); */
-
 let io = socket(server);
-var server = app.listen(process.env.PORT, () => {
-  console.log("I am running on port = " + server.address().port);
-});
 io.on("connection", function (socket) {
   console.log("Socket Connection Established with ID :" + socket.id);
+});
+var server = app.listen(process.env.PORT, () => {
+  console.log("I am running on port = " + server.address().port + "!");
 });

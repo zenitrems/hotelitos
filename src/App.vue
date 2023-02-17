@@ -27,7 +27,11 @@
 
 <style>
 #app {
-  background: #444444;
+  background-image: url("@/assets/FiestaAmericanaCondesa.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
