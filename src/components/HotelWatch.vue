@@ -4,15 +4,15 @@
       <v-card class="mx-auto" max-width="800" elevation="12" v-if="!cardHidden">
         <v-card-title>
           <div>
-            <h4 class="headline mb-0">
+            <h4 class="headline mb-3">
               {{ hotelName }}
             </h4>
           </div>
         </v-card-title>
-        <v-card-text class="pb-0">
+        <v-card-text class="mb-3">
           <div>
             <span class="font-weight-medium">
-              {{ cityCode }}
+              {{ hotelAddress }}
             </span>
           </div>
           <div>
@@ -22,7 +22,7 @@
           </div>
         </v-card-text>
         <!-- map -->
-        <v-container>
+        <v-card class="mx-auto" elevation-16 max-width="700">
           <l-map
             class=".mapWrap"
             style="height: 300px"
@@ -38,7 +38,7 @@
               </l-popup>
             </l-marker>
           </l-map>
-        </v-container>
+        </v-card>
 
         <v-card-title primary-title>
           <div>
@@ -47,8 +47,8 @@
         </v-card-title>
         <v-container grid-list-xs>
           <v-card
-            v-for="hotelOffer in hotelOffers"
-            :key="hotelOffer.id"
+            v-for="(hotelOffer, i) in hotelOffers"
+            :key="i"
             elevation="12"
             class="mx-auto mb-3"
             max-width="770"
@@ -88,10 +88,14 @@
                 <v-col cols="8" sm="4" md="4" align="center">
                   <v-btn
                     class="ma-2"
-                    :loading="isLoading"
                     :disabled="isLoading"
                     color="secondary"
-                    @click="getOfferById(hotelOffer.id)"
+                    :loading="isLoading && i == index"
+                    @click="
+                      getOfferById(hotelOffer.id);
+                      isLoading = true;
+                      index = i;
+                    "
                     ><v-icon>read_more</v-icon></v-btn
                   >
                 </v-col>
@@ -106,16 +110,16 @@
         :persistent="true"
         max-width="800"
         transition="scale-transition"
-        origin="center center"
+        origin="center up"
         :loading="isLoading"
-        @click:outside="clearOfferInfo()"
+        @click:outside="dialog = true"
         v-if="!isLoading"
       >
         <v-card v-if="!isLoading">
-          <v-container>
+          <v-card-title>
             <v-card-text>
-              <v-row>
-                <v-col>
+              <v-row align="center">
+                <v-col cols="8" sm="4" md="4">
                   <div>
                     <span>
                       {{ hotelOfferInfo.checkInDate }}
@@ -129,7 +133,7 @@
                     <v-icon>logout</v-icon>
                   </div>
                 </v-col>
-                <v-col>
+                <v-col cols="8" sm="4" md="4">
                   <div>
                     <v-icon>person</v-icon>
                     <span>
@@ -144,86 +148,100 @@
                     </span>
                   </div>
                 </v-col>
-                <v-col>
-                  <div>
+                <!--  <v-col cols="8" sm="4" md="4">
+                 <div>
                     <v-icon>bed</v-icon>
                     <span>
-                      {{ hotelOfferInfo.room.description.text }}
+                      {{ hotelOfferInfo.room.typeEstimated.beds }}
+                      {{ hotelOfferInfo.room.typeEstimated.bedType }}
                     </span>
                   </div>
-                </v-col>
+                </v-col> -->
               </v-row>
             </v-card-text>
-          </v-container>
-          <v-container>
-            <v-card-text>
-              <div>
-                <span>
-                  {{ hotelOfferInfo.id }}
-                </span>
-              </div>
-            </v-card-text>
-          </v-container>
-          <v-container grid-list-xs>
-            <v-card-text>
-              <h4>Room</h4>
-              <div>
-                <span>
-                  {{ hotelOfferInfo.description.text }}
-                </span>
-              </div>
-            </v-card-text>
-          </v-container>
-          <v-container grid-list-xs>
-            <v-card-text>
-              <h4>Policy</h4>
-              <div>
-                <li>
-                  Cancellation:
-                  {{ hotelOfferInfo.policies.cancellation }}
-                </li>
-                <li>
-                  Payment Type:
-                  {{ hotelOfferInfo.policies.paymentType }}
-                </li>
-              </div>
-            </v-card-text>
-          </v-container>
-          <v-container grid-list-xs>
-            <v-card-text>
-              <h4>Taxes</h4>
-              <v-row>
-                <div v-for="tax in hotelOfferInfo.price.taxes" :key="tax.code">
-                  <v-col>
+          </v-card-title>
+          <v-card-text>
+            <div>
+              <span>
+                {{ hotelOfferInfo.id }}
+              </span>
+            </div>
+          </v-card-text>
+          <v-card-title> Room </v-card-title>
+          <v-card-text>
+            <div>
+              <span>
+                {{ hotelOfferInfo.description.text }}
+              </span>
+            </div>
+          </v-card-text>
+          <v-card-title> Policy </v-card-title>
+          <v-card-text>
+            <ul>
+              <h5>Room description:</h5>
+              <li>
+                {{ hotelOfferInfo.room.description.text }}
+              </li>
+            </ul>
+            <ul>
+              <h5>Cancellation policy:</h5>
+              <li>
+                {{ hotelOfferInfo.policies.cancellation }}
+              </li>
+            </ul>
+            <ul>
+              <h5>Payment type</h5>
+              <li>
+                {{ hotelOfferInfo.policies.paymentType }}
+              </li>
+            </ul>
+          </v-card-text>
+          <v-card-title> Taxes </v-card-title>
+          <v-card-text>
+            <v-row>
+              <div v-for="(tax, i) in hotelOfferInfo.price.taxes" :key="i">
+                <v-col>
+                  {{ i }}
+                  <ul>
+                    <h5>Amount:</h5>
                     <li>
-                      Amount:
                       {{ tax.amount }}
                     </li>
+                  </ul>
+                  <ul>
+                    <h5>Code:</h5>
                     <li>
-                      Code:
                       {{ tax.code }}
                     </li>
+                  </ul>
+                  <ul>
+                    <h5>Currency:</h5>
                     <li>
-                      Currency:
                       {{ tax.currency }}
                     </li>
+                  </ul>
+                  <ul>
+                    <h5>Included:</h5>
                     <li>
-                      Included:
                       {{ tax.included }}
                     </li>
+                  </ul>
+                  <ul>
+                    <h5>Pricing Frequency:</h5>
                     <li>
-                      Pricing Frequency:
                       {{ tax.pricingFrequency }}
                     </li>
+                  </ul>
+                  <ul>
+                    <h5>Pricing Mode:</h5>
                     <li>
-                      Pricing Mode:
                       {{ tax.pricingMode }}
                     </li>
-                  </v-col>
-                </div>
-              </v-row>
-            </v-card-text>
-          </v-container>
+                  </ul>
+                </v-col>
+              </div>
+            </v-row>
+          </v-card-text>
           <v-card-actions>
             <v-btn @click="clearOfferInfo()"> Close </v-btn>
             <v-btn @click="bookOffer()"> Book </v-btn>
@@ -244,13 +262,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.mapWrap {
-  z-index: 1;
-  height: 300px;
-}
 </style>
 <script>
-import router from "@/router";
 import axios from "axios";
 import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
 export default {
@@ -265,10 +278,9 @@ export default {
       hotelId: "",
       hotelName: "",
       hotelGeo: [0, 0],
-      cityCode: "",
       hotelOffers: [],
-      inDate: "",
-      outDate: "",
+      hotelAddress: "",
+
       hotelOfferInfo: {
         checkInDate: "",
         checkOutDate: "",
@@ -280,9 +292,13 @@ export default {
           cancellation: { description: { text: "" } },
         },
         price: { total: "", currency: "", base: "", taxes: [], variations: {} },
-        room: { description: {} },
+        room: {
+          description: { text: "" },
+          typeEstimated: { category: "null", beds: "null", bedType: "null" },
+        },
       },
       dialog: false,
+      index: -1,
       isLoading: false,
       cardHidden: false,
       /* lEAFLEETMAP */
@@ -294,16 +310,18 @@ export default {
   },
   created() {
     let routerParams = this.$route.params;
-    if (!routerParams) {
-      return;
-    } else {
-      this.getOfferByHotelId(
-        routerParams.hotelId[0],
-        routerParams.inDate,
-        routerParams.outDate,
-        routerParams.adults
-      );
-    }
+    let rawAddress = routerParams.hotelData.address;
+    this.hotelOffers = routerParams.hotelOffers;
+    this.hotelData = routerParams.hotelData.data;
+    this.hotelAddress =
+      rawAddress.cityName +
+      " " +
+      rawAddress.stateCode +
+      ", " +
+      rawAddress.countryCode;
+    this.hotelId = this.hotelData.id;
+    this.hotelName = this.hotelData.name;
+    this.hotelGeo = [this.hotelData.latitude, this.hotelData.longitude];
   },
   computed: {},
   methods: {
@@ -314,56 +332,21 @@ export default {
         checkInDate: "",
         checkOutDate: "",
         description: { text: "" },
-        guests: {},
+        guests: { adults: "" },
         id: "",
         policies: {
           paymentType: "",
           cancellation: { description: { text: "" } },
         },
         price: { total: "", currency: "", base: "", taxes: [], variations: {} },
-        room: { description: {} },
+        room: {
+          description: { text: "" },
+          typeEstimated: { category: "", beds: "", bedType: "" },
+        },
       };
     },
 
-    getOfferByHotelId(hotelId, inDate, outDate, adults) {
-      axios
-        .get("/offerSearch", {
-          params: {
-            hotelId: hotelId,
-            in: inDate,
-            out: outDate,
-            adults: adults,
-          },
-        })
-        .then((res) => {
-          let offerData = res.data.data[0];
-          if (!offerData) {
-            console.log("There are no offers for this hotel");
-            alert("There are no offers for this hotel");
-            router.push("/");
-            return;
-          } else {
-            this.hotelOffers = offerData.offers;
-            this.hotelData = offerData.hotel;
-
-            this.hotelName = this.hotelData.name;
-            this.cityCode = this.hotelData.cityCode;
-            this.hotelGeo = [this.hotelData.latitude, this.hotelData.longitude];
-
-            this.inDate = inDate;
-            this.outDate = outDate;
-
-            console.log(this.hotelOffers, this.hotelData);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-
     getOfferById(idOffer) {
-      this.isLoading = true;
-
       axios
         .get("/offerById", { params: { offerId: idOffer } })
         .then((res) => {
@@ -374,15 +357,15 @@ export default {
             return;
           } else {
             this.hotelOfferInfo = offerInfo;
-            console.log(this.hotelOfferInfo);
             this.isLoading = false;
             this.cardHidden = true;
             this.dialog = true;
+            console.log(this.hotelOfferInfo);
           }
         })
         .catch((err) => {
-          console.log(err);
           this.isLoading = false;
+          console.log(err);
         });
     },
 
