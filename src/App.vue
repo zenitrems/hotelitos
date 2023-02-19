@@ -1,6 +1,6 @@
 <template>
   <v-app id="app">
-    <v-app-bar id="appbar" absolute dense dark>
+    <v-app-bar absolute dense dark>
       <v-menu left bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn icon v-bind="attrs" v-on="on">
@@ -24,14 +24,31 @@
     </v-container>
   </v-app>
 </template>
+<script lang="js">
+export default {
+  name: "App",
+  data() {
+    return {
+      items: [
+        {
+          src: require("@/assets/FiestaAmericanaCondesa.jpg")
+        },
+        {
+          src: require("@/assets/FiestaAmericanaCondesa.jpg")
+        },
+        {
+          src: require("@/assets/FiestaAmericanaCondesa.jpg")
+        }
+      ]
+    };
+  }
+};
+</script>
 
 <style>
 #app {
-  background-image: url("@/assets/FiestaAmericanaCondesa.jpg");
-  background-repeat: no-repeat;
+  background: url("@/assets/HotelZoneCancun.jpg") no-repeat center center;
   background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }

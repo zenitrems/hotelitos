@@ -1,14 +1,15 @@
 <template>
-  <v-container
-    class="text-center background-transparency"
-    elevation-24
-    align-center
-  >
-    <v-form v-model="validForm" ref="form" lazy-validation>
-      <v-row justify="center" align="center">
-        <v-col cols="8" sm="6" md="4">
+  <v-card class="mx-auto text-center background-transparency" elevation-20>
+    <v-alert text type="info" v-if="infoAlert">
+      {{ alertData }}
+    </v-alert>
+    <v-alert text type="error" v-if="errorAlert">
+      {{ alertData }}
+    </v-alert>
+    <v-container>
+      <v-row>
+        <v-col cols="12" sm="6" md="4">
           <v-autocomplete
-            class="mx-4"
             v-model="searched"
             :items="items"
             :loading="isLoading"
@@ -17,119 +18,143 @@
             item-value="id"
             label="Search for a hotel"
             return-object
+            :rules="[(v) => !!v || 'Required']"
+            :disabled="offerIsLoading"
             cache-items
+            prepend-icon="travel_explore"
             hide-details
-            :rules="hotelRules"
             solo
           >
           </v-autocomplete>
         </v-col>
-        <v-col cols="6" sm="4" md="4">
-          <v-dialog
-            ref="dialog"
-            v-model="modal"
+        <v-col cols="12" sm="6" md="4">
+          <v-menu
+            v-model="menu"
+            ref="menu"
+            :close-on-content-click="false"
             :return-value.sync="dates"
-            persistent
-            width="auto"
+            transition="scale-transition"
+            offset-y
+            min-width="auto"
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
-                v-model="dates"
+                v-model="dateRangeText"
                 label="Date Range"
-                prepend-icon="calendar"
+                prepend-icon="date_range"
                 readonly
-                v-bind="attrs"
                 hide-details
+                v-bind="attrs"
+                :disabled="offerIsLoading"
+                :rules="[(v) => !!v || 'Required']"
                 v-on="on"
                 solo
-                :rules="dateRules"
               ></v-text-field>
             </template>
-            <v-date-picker v-model="dates" scrollable range>
-              <v-btn text color="primary" @click="modal = false">
+            <v-date-picker
+              v-model="dates"
+              no-title
+              scrollable
+              range
+              format="yyyy-MM-dd"
+              :allowed-dates="disablePastDates"
+              color="secondary"
+            >
+              <v-btn text color="secondary" @click="menu = false">
                 Cancel
               </v-btn>
-              <v-btn text color="primary" @click="$refs.dialog.save(dates)">
+              <v-btn fab text color="success" @click="$refs.menu.save(dates)">
                 OK
               </v-btn>
             </v-date-picker>
-          </v-dialog>
+          </v-menu>
         </v-col>
-        <v-col cols="4" sm="2" md="2">
+        <v-col>
           <v-combobox
             v-model="adults"
+            prepend-icon="people"
             label="Adults"
             :items="adultsItems"
+            :disabled="offerIsLoading"
+            :rules="[(v) => !!v || 'Required']"
             hide-details
             solo
           ></v-combobox>
         </v-col>
-        <v-col cols="8" >
+        <v-col>
           <v-btn
-            class="ma-2"
-            :disabled="offerIsLoading"
+            class="mt-2"
+            :disabled="
+              offerIsLoading || isLoading || !searched || !dates || !adults
+            "
             :loading="offerIsLoading"
             isLoading="true;"
             index="i;"
             @click="getOfferByHotelId()"
-            color="primary"
+            color="blue"
+            outlined
           >
-            Continue
+            Search
           </v-btn>
         </v-col>
-        <v-col cols="8">
-          <v-container grid-list-xs>
-            <v-alert dense text type="info" v-if="infoAlert">
-              {{ alertData }}
-            </v-alert>
-            <v-alert dense text type="error" v-if="errorAlert">
-              {{ alertData }}
-            </v-alert>
-          </v-container>
-        </v-col>
       </v-row>
-    </v-form>
-  </v-container>
+    </v-container>
+  </v-card>
 </template>
 <style>
 .background-transparency {
-  background-color: rgba(70, 69, 69, 0.705) !important;
+  background-color: rgba(233, 240, 255, 0.705) !important;
 }
 </style>
 
 <script>
-//axios is a promise based HTTP client for the browser and node.js
 import router from "@/router";
 import axios from "axios";
+
 export default {
   data() {
     return {
-      isLoading: false,
-      offerIsLoading: false,
       items: [],
       searched: null,
       search: null,
-      hotels: [],
-      modal: false,
+      menu: false,
       dates: [],
-      adults: [],
+
+      adults: "",
       adultsItems: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+
+      isLoading: false,
+      offerIsLoading: false,
+
       validForm: false,
-      status: null,
       errorAlert: false,
       infoAlert: false,
       alertData: null,
-      dateRules: [(v) => !!v || "Date is required"],
-      hotelRules: [],
     };
   },
   watch: {
+    //watch search query
     search(val) {
-      val && val !== this.select && this.searchDebounced(val);
+      if (val && val.length >= 3) {
+        this.searchDebounced();
+      } else if (val && val.length <= 3) {
+        this.items = [];
+        console.log("min 3 chars");
+      }
+    },
+  },
+
+  computed: {
+    dateRangeText() {
+      return this.dates.join(" ~ ");
     },
   },
 
   methods: {
+    resetAlerts() {
+      this.errorAlert = false;
+      this.infoAlert = false;
+    },
     getItemText(item) {
       return (
         item.name +
@@ -139,10 +164,10 @@ export default {
         item.address.countryCode
       );
     },
-    allowedDates: (date) => {
-      const today = new Date();
-      return date > today;
+    disablePastDates(val) {
+      return val >= new Date().toISOString().substr(0, 10);
     },
+
     validate() {
       if (this.$refs.form.validate()) {
         alert("Form Submitted!");
@@ -150,7 +175,6 @@ export default {
     },
     //debounce search query to avoid spamming the server
     searchDebounced() {
-      console.log("validate passed");
       this.isLoading = true;
       //clear previous timeout
       clearTimeout(this._timerId);
@@ -169,7 +193,7 @@ export default {
               let searchData = res.data.data;
               this.items = searchData;
               this.isLoading = false;
-              this.alert = false;
+              this.resetAlerts();
             }
           })
           .catch((err) => {
@@ -201,17 +225,23 @@ export default {
           let resData = res.data;
           if (resData.length == 1) {
             this.offerIsLoading = false;
-            this.errorAlert = true;
-            this.alertData = resData[0].code + " " + resData[0].detail;
+            this.errorAlert = true && this.infoAlert == false;
+            this.alertData =
+              "Code=" +
+              resData[0].code +
+              " - " +
+              resData[0].detail +
+              "-" +
+              resData[0].tittle;
             return;
           } else if (resData.data.length == 0) {
             this.offerIsLoading = false;
-            this.infoAlert = true;
-            this.alertData = "No offers found for this hotel";
+            this.infoAlert = true && this.errorAlert == false;
+            this.alertData = "No Offers Found";
             return;
           } else {
             let offerData = resData.data[0];
-            this.errorAlert = false && this.infoAlert == false;
+            this.resetAlerts();
             this.offerIsLoading = false;
             router.push({
               name: "HotelWatch",

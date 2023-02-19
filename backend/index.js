@@ -101,9 +101,27 @@ app.get("/offerById", (req, res) => {
   amadeus.shopping
     .hotelOfferSearch(req.query.offerId)
     .get({
-      offerId : req.query.offerId,
+      offerId: req.query.offerId,
       lang: "EN",
     })
+    .then(function (response) {
+      res.send(response.result);
+    })
+    .catch(function (responseError) {
+      console.log(responseError.description);
+      res.send(responseError.description);
+    });
+});
+
+app.get("/bookingOffer", (req, res) => {
+  amadeus.booking.hotelBookings
+    .post(
+      JSON.stringify({
+        offerId: req.query.offerId,
+        guests: req.query.guests,
+        payments: req.query.payments,
+      })
+    )
     .then(function (response) {
       res.send(response.result);
     })

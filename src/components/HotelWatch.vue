@@ -177,24 +177,24 @@
           </v-card-text>
           <v-card-title> Policy </v-card-title>
           <v-card-text>
-            <ul>
+            <div>
               <h5>Room description:</h5>
-              <li>
+              <span>
                 {{ hotelOfferInfo.room.description.text }}
-              </li>
-            </ul>
-            <ul>
+              </span>
+            </div>
+            <div>
               <h5>Cancellation policy:</h5>
-              <li>
+              <span>
                 {{ hotelOfferInfo.policies.cancellation }}
-              </li>
-            </ul>
-            <ul>
+              </span>
+            </div>
+            <div>
               <h5>Payment type</h5>
-              <li>
+              <span>
                 {{ hotelOfferInfo.policies.paymentType }}
-              </li>
-            </ul>
+              </span>
+            </div>
           </v-card-text>
           <v-card-title> Taxes </v-card-title>
           <v-card-text>
@@ -202,42 +202,42 @@
               <div v-for="(tax, i) in hotelOfferInfo.price.taxes" :key="i">
                 <v-col>
                   {{ i }}
-                  <ul>
+                  <div>
                     <h5>Amount:</h5>
-                    <li>
+                    <span>
                       {{ tax.amount }}
-                    </li>
-                  </ul>
-                  <ul>
+                    </span>
+                  </div>
+                  <div>
                     <h5>Code:</h5>
-                    <li>
+                    <span>
                       {{ tax.code }}
-                    </li>
-                  </ul>
-                  <ul>
+                    </span>
+                  </div>
+                  <div>
                     <h5>Currency:</h5>
-                    <li>
+                    <span>
                       {{ tax.currency }}
-                    </li>
-                  </ul>
-                  <ul>
+                    </span>
+                  </div>
+                  <div>
                     <h5>Included:</h5>
-                    <li>
+                    <span>
                       {{ tax.included }}
-                    </li>
-                  </ul>
-                  <ul>
+                    </span>
+                  </div>
+                  <div>
                     <h5>Pricing Frequency:</h5>
-                    <li>
+                    <span>
                       {{ tax.pricingFrequency }}
-                    </li>
-                  </ul>
-                  <ul>
+                    </span>
+                  </div>
+                  <div>
                     <h5>Pricing Mode:</h5>
-                    <li>
+                    <span>
                       {{ tax.pricingMode }}
-                    </li>
-                  </ul>
+                    </span>
+                  </div>
                 </v-col>
               </div>
             </v-row>
@@ -280,7 +280,6 @@ export default {
       hotelGeo: [0, 0],
       hotelOffers: [],
       hotelAddress: "",
-
       hotelOfferInfo: {
         checkInDate: "",
         checkOutDate: "",
@@ -302,7 +301,7 @@ export default {
       isLoading: false,
       cardHidden: false,
       /* lEAFLEETMAP */
-      zoom: 16,
+      zoom: 10,
       url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       attribution:
         'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
