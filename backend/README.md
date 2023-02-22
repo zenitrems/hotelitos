@@ -1,4 +1,4 @@
-# hotelitos is an hotel search engine using amadeus api.
+# hotelitos
 
 ## Project setup
 
@@ -11,8 +11,3 @@ npm install
 ```
 npm run dev
 ```
-
-#### ToDo
-
-
-Back end

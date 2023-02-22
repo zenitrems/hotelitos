@@ -1,4 +1,8 @@
-# hotelitos is a hotel search engine using Amadeus Self Api, Node and Vue.
+# Hotelitos Search
+
+**Client:** Vue, Vuetify, Axios
+
+**Server:** Node, Express, AmadeusApi
 
 ## Project setup
 
@@ -12,10 +16,26 @@ npm install
 npm run serve
 ```
 
+## Environment Variables
 
-.env variables
-AXIOS_BASE_URL
+**vue**
+
+`VUE_APP_AXIOS_BASE_URL`
+
+**node**
+
+`NODE_ENV`
+
+`PORT`
+
+`AMADEUS_CLIENT_ID`
+
+`AMADEUS_CLIENT_SECRET`
 
 #### TODO
-booking
-Fetch Media For Hotels google places api
+
+Booking
+
+Poi's
+
+Fetch media for hotels with google places api
