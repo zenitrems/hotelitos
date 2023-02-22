@@ -1,5 +1,5 @@
 <template>
-  <v-app id="app">
+  <v-app id="app" :style="{ 'background-Image': randomImage() }">
     <v-app-bar absolute dense dark>
       <v-menu left bottom>
         <template v-slot:activator="{ on, attrs }">
@@ -29,27 +29,33 @@ export default {
   name: "App",
   data() {
     return {
-      items: [
-        {
-          src: require("@/assets/FiestaAmericanaCondesa.jpg")
-        },
-        {
-          src: require("@/assets/FiestaAmericanaCondesa.jpg")
-        },
-        {
-          src: require("@/assets/FiestaAmericanaCondesa.jpg")
-        }
-      ]
+      images: [
+      require("@/assets/Hotel1.webp"),
+      require("@/assets/Hotel2.webp"),
+      require("@/assets/Hotel3.webp"),
+      require("@/assets/Hotel4.webp"),
+      require("@/assets/Hotel5.webp"),
+      require("@/assets/Hotel6.webp"),
+      require("@/assets/Hotel7.webp"),
+      require("@/assets/Hotel8.webp"),
+
+     ]
     };
-  }
+  },
+  methods:{
+  randomImage() {
+      return `url("${
+        this.images[Math.floor(Math.random() * this.images.length)]
+      }")`;
+    },
+  },
 };
 </script>
-
 <style>
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,200;8..144,400&display=swap");
 #app {
-  background: url("@/assets/HotelZoneCancun.jpg") no-repeat center center;
+  font-family: "Roboto Flex", sans-serif;
+  background: no-repeat center center fixed;
   background-size: cover;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 </style>

@@ -34,11 +34,12 @@ var amadeus = new Amadeus({
 1797	INVALID FORMAT
 572	INVALID LENGTH
 32171	MANDATORY DATA MISSING */
-app.get("/search", function (req, res) {
+
+app.get("/search", async (req, res) => {
   amadeus.referenceData.locations.hotel
     .get({
       keyword: req.query.keyword,
-      subType: "HOTEL_GDS", //'HOTEL_LEISURE'  FOR AGGREGATORS
+      subType: "HOTEL_GDS", //"HOTEL_LEISURE"
       lang: "EN",
     })
     .then(function (response) {
@@ -75,13 +76,14 @@ app.get("/search", function (req, res) {
   562	RESTRICTED ACCESS FOR THE REQUESTED RATES AND CHAINS
   784	PROVIDER TIME OUT
   790	RATE SECURITY NOT LOADED */
-app.get("/offerSearch", (req, res) => {
+app.get("/offerSearch", async (req, res) => {
   amadeus.shopping.hotelOffersSearch
     .get({
-      hotelIds: req.query.hotelId,
+      hotelIds: req.query.hotelIds,
       adults: req.query.adults,
       checkInDate: req.query.in,
       checkOutDate: req.query.out,
+      roomQuantity: req.query.roomQuantity,
       includeClosed: false,
       bestRateOnly: false,
       lang: "EN",
@@ -97,7 +99,7 @@ app.get("/offerSearch", (req, res) => {
     });
 });
 
-app.get("/offerById", (req, res) => {
+app.get("/offerById", async (req, res) => {
   amadeus.shopping
     .hotelOfferSearch(req.query.offerId)
     .get({
@@ -131,7 +133,7 @@ app.get("/bookingOffer", (req, res) => {
     });
 });
 
-app.get("/hotelSearch", (req, res) => {
+app.get("/hotelSearch", async (req, res) => {
   var hotelId = req.query.hotelId;
   amadeus.referenceData.locations.hotels.byHotels
     .get({

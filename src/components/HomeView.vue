@@ -1,30 +1,40 @@
 <template>
-  <v-card class="mx-auto text-center background-transparency" elevation-20>
-    <v-alert text type="info" v-if="infoAlert">
-      {{ alertData }}
-    </v-alert>
-    <v-alert text type="error" v-if="errorAlert">
-      {{ alertData }}
-    </v-alert>
-    <v-container>
+  <v-card class="mx-auto background-transparency" elevation-20>
+    <v-container grid-list-md>
+      <v-alert text type="info" v-if="infoAlert">
+        {{ alertData }}
+      </v-alert>
+      <v-alert text type="error" v-if="errorAlert">
+        {{ alertData }}
+      </v-alert>
+
       <v-row>
         <v-col cols="12" sm="6" md="4">
           <v-autocomplete
             v-model="searched"
             :items="items"
-            :loading="isLoading"
             :search-input.sync="search"
+            :loading="searchQueryLoading"
             :item-text="getItemText"
             item-value="id"
             label="Search for a hotel"
             return-object
+            cache-items
             :rules="[(v) => !!v || 'Required']"
             :disabled="offerIsLoading"
-            cache-items
             prepend-icon="travel_explore"
             hide-details
             solo
           >
+            <template v-slot:item="{ item }">
+              <v-list-item-content>
+                <v-list-item-title v-html="item.name"></v-list-item-title>
+                <v-list-item-subtitle
+                  >{{ item.address.cityName }} - {{ item.iataCode }} -
+                  {{ item.address.countryCode }}
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </template>
           </v-autocomplete>
         </v-col>
         <v-col cols="12" sm="6" md="4">
@@ -69,7 +79,7 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-        <v-col>
+        <v-col cols="6" sm="4" md="2">
           <v-combobox
             v-model="adults"
             prepend-icon="people"
@@ -79,20 +89,37 @@
             :rules="[(v) => !!v || 'Required']"
             hide-details
             solo
-          ></v-combobox>
+          >
+          </v-combobox>
         </v-col>
-        <v-col>
+        <v-col cols="6" sm="4" md="2">
+          <v-combobox
+            v-model="rooms"
+            prepend-icon="meeting_room"
+            label="Rooms"
+            :items="roomsItems"
+            :disabled="offerIsLoading"
+            :rules="[(v) => !!v || '!required']"
+            hide-details
+            solo
+          >
+          </v-combobox>
+        </v-col>
+        <v-col class="d-flex justify-center">
           <v-btn
-            class="mt-2"
+            class="mt-1"
             :disabled="
-              offerIsLoading || isLoading || !searched || !dates || !adults
+              offerIsLoading ||
+              searchQueryLoading ||
+              !searched ||
+              !dates ||
+              !adults ||
+              !rooms
             "
             :loading="offerIsLoading"
-            isLoading="true;"
             index="i;"
             @click="getOfferByHotelId()"
             color="blue"
-            outlined
           >
             Search
           </v-btn>
@@ -103,14 +130,13 @@
 </template>
 <style>
 .background-transparency {
-  background-color: rgba(233, 240, 255, 0.705) !important;
+  background-color: rgba(129, 136, 153, 0.705) !important;
 }
 </style>
 
 <script>
 import router from "@/router";
 import axios from "axios";
-
 export default {
   data() {
     return {
@@ -122,8 +148,10 @@ export default {
 
       adults: "",
       adultsItems: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      rooms: "",
+      roomsItems: [1, 2, 3, 4, 5, 6, 7, 8, 9],
 
-      isLoading: false,
+      searchQueryLoading: false,
       offerIsLoading: false,
 
       validForm: false,
@@ -135,11 +163,12 @@ export default {
   watch: {
     //watch search query
     search(val) {
-      if (val && val.length >= 3) {
-        this.searchDebounced();
-      } else if (val && val.length <= 3) {
-        this.items = [];
+      if (val && val.length <= 3) {
         console.log("min 3 chars");
+      } else if (val && val.length >= 3) {
+        this.searchDebounced();
+      } else {
+        this.items = [];
       }
     },
   },
@@ -175,7 +204,7 @@ export default {
     },
     //debounce search query to avoid spamming the server
     searchDebounced() {
-      this.isLoading = true;
+      this.searchQueryLoading = true;
       //clear previous timeout
       clearTimeout(this._timerId);
       //set new timeout
@@ -187,17 +216,18 @@ export default {
             if (res.data.length == 1) {
               this.alertData = res.data[0];
               this.alertInfo = true;
-              this.isLoading = false;
+              this.searchQueryLoading = false;
               return;
             } else {
               let searchData = res.data.data;
               this.items = searchData;
-              this.isLoading = false;
+              this.searchQueryLoading = false;
               this.resetAlerts();
+              console.log(searchData);
             }
           })
           .catch((err) => {
-            this.isLoading = false;
+            this.searchQueryLoading = false;
             console.log(err);
           });
         //set timeout to 850ms
@@ -207,18 +237,21 @@ export default {
     getOfferByHotelId() {
       this.offerIsLoading = true;
       let searchData = {
-        hotelId: this.searched.hotelIds[0],
+        hotelIds: JSON.stringify(this.searched.hotelIds),
         in: this.dates[0],
         out: this.dates[1],
         adults: this.adults,
+        roomQuantity: this.rooms,
       };
+      console.log(searchData);
       axios
         .get("/offerSearch", {
           params: {
-            hotelId: searchData.hotelId,
+            hotelIds: searchData.hotelIds,
             in: searchData.in,
             out: searchData.out,
             adults: searchData.adults,
+            roomQuantity: searchData.roomQuantity,
           },
         })
         .then((res) => {

@@ -14,9 +14,8 @@ Icon.Default.mergeOptions({
   shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
 });
 axios.defaults.baseURL = process.env.VUE_APP_AXIOS_BASE_URL;
-
-window.Vue = Vue;
 Vue.config.productionTip = false;
+window.Vue = Vue;
 new Vue({
   vuetify,
   router,
