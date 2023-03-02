@@ -115,13 +115,15 @@ app.get("/offerById", async (req, res) => {
     });
 });
 
-app.get("/bookingOffer", (req, res) => {
+app.post("/bookingOffer", (req, res) => {
+  console.log(req.body.data);
   amadeus.booking.hotelBookings
     .post(
       JSON.stringify({
-        offerId: req.query.offerId,
-        guests: req.query.guests,
-        payments: req.query.payments,
+        offerId: req.body.data.offerId,
+        guests: req.body.data.guests,
+        payments: req.body.datapayments,
+        rooms: req.body.data.rooms,
       })
     )
     .then(function (response) {
