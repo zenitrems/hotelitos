@@ -128,12 +128,6 @@
     </v-container>
   </v-card>
 </template>
-<style>
-.background-transparency {
-  background-color: rgba(129, 136, 153, 0.705) !important;
-}
-</style>
-
 <script>
 import router from "@/router";
 import axios from "axios";

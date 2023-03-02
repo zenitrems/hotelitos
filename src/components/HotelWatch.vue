@@ -59,9 +59,9 @@
             elevation="12"
             max-width="770"
           >
-            <v-card-text>
-              <v-row>
-                <v-col cols="8" sm="6" md="4">
+            <v-card-text class="text-center">
+              <v-row class="justify-center">
+                <v-col cols="4">
                   <div>
                     <v-icon>bed</v-icon>
                     <span>
@@ -78,7 +78,7 @@
                     </span>
                   </div>
                 </v-col>
-                <v-col cols="8" sm="6" md="4">
+                <v-col cols="4">
                   <div>
                     <v-icon>payment</v-icon>
                     <span>
@@ -252,7 +252,7 @@
             </v-card-text>
             <v-card-actions>
               <v-btn @click="clearOfferInfo()"> Close </v-btn>
-              <v-btn @click="bookOffer()"> Book </v-btn>
+              <v-btn @click="bookOffer(hotelOfferInfo)"> Book </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -260,18 +260,6 @@
     </v-col>
   </v-row>
 </template>
-<style>
-.center-padding {
-  padding-top: 50px;
-}
-
-.TextClass {
-  white-space: nowrap;
-  word-break: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-</style>
 <script>
 import axios from "axios";
 import router from "@/router";
@@ -393,8 +381,20 @@ export default {
         });
     },
 
-    bookOffer() {
-      console.log("Book Offer");
+    bookOffer(hotelOfferInfo) {
+      if (!hotelOfferInfo) {
+        console.log("No Data");
+
+        return;
+      } else {
+        router.push({
+          name: "HotelBooking",
+          params: {
+            offerData: hotelOfferInfo,
+            hotelData: this.hotelData,
+          },
+        });
+      }
     },
   },
 };

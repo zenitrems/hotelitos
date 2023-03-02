@@ -24,6 +24,9 @@
     </v-container>
   </v-app>
 </template>
+<style lang="scss" scoped>
+@import "@/styles/settings.scss";
+</style>
 <script lang="js">
 export default {
   name: "App",
@@ -51,11 +54,3 @@ export default {
   },
 };
 </script>
-<style>
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,200;8..144,400&display=swap");
-#app {
-  font-family: "Roboto Flex", sans-serif;
-  background: no-repeat center center fixed;
-  background-size: cover;
-}
-</style>

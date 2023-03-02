@@ -1,0 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,200;8..144,400&display=swap");
+#app {
+  font-family: "Roboto Flex", sans-serif;
+  background: no-repeat center center fixed;
+  background-size: cover;
+}
+.center-padding {
+  padding-top: 60px;
+}
+.background-transparency {
+  background-color: rgba(129, 136, 153, 0.705) !important;
+}
+.TextClass {
+  white-space: nowrap;
+  word-break: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.TextClass:hover {
+  white-space: normal;
+  word-break: break-all;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+
+
