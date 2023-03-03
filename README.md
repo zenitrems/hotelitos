@@ -18,11 +18,11 @@ npm run serve
 
 ## Environment Variables
 
-**vue**
+**VUE**
 
 `VUE_APP_AXIOS_BASE_URL`
 
-**node**
+**NODE**
 
 `NODE_ENV`
 

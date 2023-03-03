@@ -1,4 +1,4 @@
-# hotelitos
+# hotelitos Backend
 
 ## Project setup
 
