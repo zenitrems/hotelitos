@@ -32,6 +32,9 @@ npm run serve
 
 `AMADEUS_CLIENT_SECRET`
 
+`GOOGLE_API_KEY`
+
+
 #### TODO
 
 Booking

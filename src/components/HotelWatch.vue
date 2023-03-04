@@ -277,6 +277,8 @@ export default {
       perPage: 4,
       hotelOffers: [],
 
+      hotelData: {},
+
       hotelId: "",
       hotelName: "",
       hotelGeo: [0, 0],
@@ -313,11 +315,14 @@ export default {
       router.push({ name: "Home" });
     } else {
       let routerParams = this.$route.params;
+      console.log(routerParams);
       let rawAddress = routerParams.hotelData.address;
       this.hotelOffers = routerParams.hotelOffers;
       this.hotelData = routerParams.hotelData.data;
-      this.hotelAddress =
-        rawAddress.cityName +
+      this.hotelAddress = this.placeAditionalData(
+        routerParams.hotelData.data.name
+      );
+      rawAddress.cityName +
         " " +
         rawAddress.stateCode +
         ", " +
@@ -395,6 +400,18 @@ export default {
           },
         });
       }
+    },
+
+    placeAditionalData(hotelName) {
+      console.log(hotelName);
+      axios
+        .get("/placeAditionalInfo", { params: { hotelName: hotelName } })
+        .then((res) => {
+          console.log(res.data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 };

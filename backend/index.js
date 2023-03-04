@@ -11,6 +11,8 @@ const app = express();
 const morgan = require("morgan");
 //body parser is a middleware to parse the body of the request
 const bodyParser = require("body-parser");
+//Google Maps API
+const { Client } = require("@googlemaps/google-maps-services-js");
 
 //initialize
 app.use(
@@ -21,6 +23,9 @@ app.use(
     extended: true,
   })
 );
+
+//places client init
+const placesClient = new Client({});
 
 //amadeus api
 var Amadeus = require("amadeus");
@@ -91,11 +96,54 @@ app.get("/offerSearch", async (req, res) => {
       currency: "USD",
     })
     .then(function (response) {
-      res.send(response.result);
+      if (response.result.data.length > 0) {
+        res.send(response.result);
+      } else {
+        res.send(response.result);
+      }
     })
     .catch(function (responseError) {
       console.log(responseError.description);
       res.send(responseError.description);
+    });
+});
+
+app.get("/placeAditionalInfo", async (req, res) => {
+  console.log(req);
+  placesClient
+    .findPlaceFromText({
+      params: {
+        input: req.query.hotelName,
+        inputtype: "textquery",
+        key: process.env.GOOGLE_API_KEY,
+      },
+      timeout: 1000, // milliseconds
+    })
+    .then(function (response) {
+      if (response.data.candidates.length > 0) {
+        placesClient
+          .placeDetails({
+            params: {
+              place_id: response.data.candidates[0].place_id,
+              key: process.env.GOOGLE_API_KEY,
+            },
+            timeout: 1000, // milliseconds
+          })
+          .then(function (response) {
+            res.send(response.data);
+          })
+          .catch(function (responseError) {
+            console.log(responseError);
+            res.send(responseError);
+          });
+      } else {
+        res.send(response.data, "No place found");
+        console.log("No place found");
+      }
+    })
+    .catch(function (responseError) {
+      console.log(responseError);
+      res.send(responseError);
     });
 });
 
