@@ -1,44 +1,108 @@
 <template>
   <v-row class="center-padding">
     <v-col>
-      <v-card class="mx-auto" max-width="800" elevation="12" v-if="!cardHidden">
-        <v-card-title>
-          <div>
-            <h4 class="headline mb-3">
-              {{ hotelName }}
-            </h4>
-          </div>
-        </v-card-title>
-        <v-card-text class="mb-3">
-          <div>
-            <span class="font-weight-medium">
-              {{ hotelAddress }}
-            </span>
-          </div>
-          <div>
-            <span>
-              {{ hotelId }}
-            </span>
-          </div>
-        </v-card-text>
-        <!-- map -->
-        <v-card class="mx-auto" elevation-16 max-width="700">
-          <l-map
-            class=".mapWrap"
-            style="height: 300px"
-            :zoom="zoom"
-            :center="hotelGeo"
-          >
-            <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
-            <l-marker :lat-lng="hotelGeo">
-              <l-popup>
+      <v-card
+        class="mx-auto mb-3"
+        max-width="800"
+        elevation="12"
+        v-if="!cardHidden"
+      >
+        <v-container>
+          <v-card-title>
+            <div>
+              <h4 class="headline mb-3">
+                {{ hotelName }}
+              </h4>
+            </div>
+          </v-card-title>
+          <v-card-text class="mb-3">
+            <v-container>
+              <div>
                 <span>
-                  {{ hotelName }}
+                  {{ hotelFormatedAddress }}
                 </span>
-              </l-popup>
-            </l-marker>
-          </l-map>
-        </v-card>
+              </div>
+              <div>
+                <span>
+                  {{ hotelFormatedPhone }}
+                </span>
+              </div>
+              <div>
+                <span>
+                  {{ editorialSummary }}
+                </span>
+              </div>
+            </v-container>
+          </v-card-text>
+          <!-- map -->
+          <v-container class="mb-3">
+            <l-map
+              class=".mapWrap"
+              style="height: 300px"
+              :zoom="zoom"
+              :center="hotelGeo"
+            >
+              <l-tile-layer
+                :url="url"
+                :attribution="attribution"
+              ></l-tile-layer>
+              <l-marker :lat-lng="hotelGeo">
+                <l-popup>
+                  <span>
+                    {{ hotelName }}
+                  </span>
+                </l-popup>
+              </l-marker>
+            </l-map>
+          </v-container>
+          <v-container fluid>
+            <v-slide-group
+              class="pa-4"
+              v-model="hotelReviews"
+              elevation="12"
+              show-arrows
+            >
+              <v-slide-item v-for="(hotelReview, i) in hotelReviews" :key="i">
+                <v-container>
+                  <v-card
+                    class="mx-auto overflow-auto"
+                    max-width="600"
+                    max-height="300"
+                    elevation-11
+                  >
+                    <v-card-text>
+                      <span class="subtitle1">
+                        {{ hotelReview.author_name }}
+                      </span>
+                      <div>
+                        <span class="caption">
+                          {{ hotelReview.relative_time_description }}
+                        </span>
+                      </div>
+                      <div>
+                        <v-rating
+                          :value="hotelReview.rating"
+                          :max="5"
+                          color="amber"
+                          size="9"
+                          :readonly="true"
+                        >
+                        </v-rating>
+                      </div>
+                      <div>
+                        <p class="caption text-justify font-weight-thin">
+                          {{ hotelReview.text }}
+                        </p>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </v-container>
+              </v-slide-item>
+            </v-slide-group>
+          </v-container>
+        </v-container>
+      </v-card>
+      <v-card class="mx-auto" max-width="800" elevation="12" v-if="!cardHidden">
         <v-card-title primary-title>
           <div>
             <h4 class="headline mb-0">Rooms</h4>
@@ -281,8 +345,11 @@ export default {
 
       hotelId: "",
       hotelName: "",
+      editorialSummary: "",
       hotelGeo: [0, 0],
-      hotelAddress: "",
+      hotelFormatedAddress: "",
+      hotelFormatedPhone: "",
+      hotelReviews: [],
       hotelOfferInfo: {
         checkInDate: "",
         checkOutDate: "",
@@ -315,7 +382,7 @@ export default {
       router.push({ name: "Home" });
     } else {
       let routerParams = this.$route.params;
-      console.log(routerParams);
+
       let rawAddress = routerParams.hotelData.address;
       this.hotelOffers = routerParams.hotelOffers;
       this.hotelData = routerParams.hotelData.data;
@@ -377,7 +444,6 @@ export default {
             this.isLoading = false;
             this.cardHidden = true;
             this.dialog = true;
-            console.log(this.hotelOfferInfo);
           }
         })
         .catch((err) => {
@@ -401,12 +467,19 @@ export default {
         });
       }
     },
-
     placeAditionalData(hotelName) {
-      console.log(hotelName);
       axios
-        .get("/placeAditionalInfo", { params: { hotelName: hotelName } })
+        .get("/placeAditionalInfo", { params: { hotelName: { hotelName } } })
         .then((res) => {
+          this.hotelFormatedAddress = res.data.formatted_address;
+          this.hotelGeo = [
+            res.data.geometry.location.lat,
+            res.data.geometry.location.lng,
+          ];
+          this.photoArray = res.data.photos;
+          this.editorialSummary = res.data.editorial_summary.overview;
+          this.hotelFormatedPhone = res.data.formatted_phone_number;
+          this.hotelReviews = res.data.reviews;
           console.log(res.data);
         })
         .catch((err) => {

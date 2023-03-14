@@ -2,8 +2,6 @@
 require("dotenv").config();
 //cors is a middleware to allow cross origin requests
 const cors = require("cors");
-//socket.io is a library to create a websocket
-const socket = require("socket.io");
 //express is a framework to create a server
 const express = require("express");
 const app = express();
@@ -11,36 +9,96 @@ const app = express();
 const morgan = require("morgan");
 //body parser is a middleware to parse the body of the request
 const bodyParser = require("body-parser");
-//Google Maps API
+//Amadeus API Client
+const Amadeus = require("amadeus");
+//Google Maps API Client
 const { Client } = require("@googlemaps/google-maps-services-js");
 
-//initialize
-app.use(
-  cors(),
-  morgan("dev"),
-  bodyParser.json(),
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
+//server init
+app.use(cors());
+app.use(morgan("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 //places client init
 const placesClient = new Client({});
-
-//amadeus api
-var Amadeus = require("amadeus");
-var amadeus = new Amadeus({
+//amadeus client init
+const amadeus = new Amadeus({
   clientId: process.env.AMADEUS_CLIENT_ID,
   clientSecret: process.env.AMADEUS_CLIENT_SECRET,
 });
 
-/* Hotel name autocomplete for keyword 'keyyword' using  HOTEL_GDS category of search
+function handlePhoto(photoArray) {
+  photoArray.forEach((photo) => {
+    placesClient
+      .placePhoto({
+        params: {
+          photoreference: photo.photo_reference,
+          key: process.env.GOOGLE_API_KEY,
+          maxwidth: photo.width,
+          maxheight: photo.height,
+        },
+        timeout: 1000, // milliseconds
+      })
+      .then(function (response) {
+        let photo = response.request.res.responseUrl;
+        console.log(photo);
+        return photo;
+      })
+      .catch(function (responseError) {
+        console.log(responseError);
+      });
+  });
+}
+//Aditional Info
+app.get("/placeAditionalInfo", async function (req, res) {
+  placesClient
+    .findPlaceFromText({
+      params: {
+        input: req.query.hotelName,
+        inputtype: "textquery",
+        key: process.env.GOOGLE_API_KEY,
+      },
+      timeout: 1000, // milliseconds
+    })
+    .then(function (response) {
+      if (response.data.candidates.length > 0) {
+        placesClient
+          .placeDetails({
+            params: {
+              place_id: response.data.candidates[0].place_id,
+              key: process.env.GOOGLE_API_KEY,
+            },
+            timeout: 1000, // milliseconds
+          })
+          .then(function (response) {
+            res.status(200);
+            handlePhoto(response.data.result.photos);
+            res.send(response.data.result);
+          })
+          .catch(function (responseError) {
+            console.log(responseError);
+            res.send(responseError);
+            res.status(500);
+          });
+      } else {
+        res.send(response.data, "No results");
+        res.status(400);
+        console.log("No results");
+      }
+    })
+    .catch(function (responseError) {
+      console.log(responseError);
+      res.send(responseError);
+    });
+});
+/* Hotel name autocomplete for keyword 'keyyword' using   HOTEL_GDS  category of search
 477	NOT FOUND
 1797	INVALID FORMAT
 572	INVALID LENGTH
 32171	MANDATORY DATA MISSING */
-
-app.get("/search", async (req, res) => {
+app.get("/search", async function (req, res) {
   amadeus.referenceData.locations.hotel
     .get({
       keyword: req.query.keyword,
@@ -49,10 +107,12 @@ app.get("/search", async (req, res) => {
     })
     .then(function (response) {
       res.send(response.result);
+      res.status(200);
     })
     .catch(function (responseError) {
       console.log(responseError.description);
       res.send(responseError.description);
+      res.status(400);
     });
 });
 
@@ -81,7 +141,7 @@ app.get("/search", async (req, res) => {
   562	RESTRICTED ACCESS FOR THE REQUESTED RATES AND CHAINS
   784	PROVIDER TIME OUT
   790	RATE SECURITY NOT LOADED */
-app.get("/offerSearch", async (req, res) => {
+app.get("/offerSearch", async function (req, res) {
   amadeus.shopping.hotelOffersSearch
     .get({
       hotelIds: req.query.hotelIds,
@@ -108,46 +168,7 @@ app.get("/offerSearch", async (req, res) => {
     });
 });
 
-app.get("/placeAditionalInfo", async (req, res) => {
-  console.log(req);
-  placesClient
-    .findPlaceFromText({
-      params: {
-        input: req.query.hotelName,
-        inputtype: "textquery",
-        key: process.env.GOOGLE_API_KEY,
-      },
-      timeout: 1000, // milliseconds
-    })
-    .then(function (response) {
-      if (response.data.candidates.length > 0) {
-        placesClient
-          .placeDetails({
-            params: {
-              place_id: response.data.candidates[0].place_id,
-              key: process.env.GOOGLE_API_KEY,
-            },
-            timeout: 1000, // milliseconds
-          })
-          .then(function (response) {
-            res.send(response.data);
-          })
-          .catch(function (responseError) {
-            console.log(responseError);
-            res.send(responseError);
-          });
-      } else {
-        res.send(response.data, "No place found");
-        console.log("No place found");
-      }
-    })
-    .catch(function (responseError) {
-      console.log(responseError);
-      res.send(responseError);
-    });
-});
-
-app.get("/offerById", async (req, res) => {
+app.get("/offerById", async function (req, res) {
   amadeus.shopping
     .hotelOfferSearch(req.query.offerId)
     .get({
@@ -183,11 +204,10 @@ app.post("/bookingOffer", (req, res) => {
     });
 });
 
-app.get("/hotelSearch", async (req, res) => {
-  var hotelId = req.query.hotelId;
+app.get("/hotelSearch", async function (req, res) {
   amadeus.referenceData.locations.hotels.byHotels
     .get({
-      hotelIds: hotelId,
+      hotelIds: req.query.hotelId,
     })
     .then(function (response) {
       res.send(response.result);
@@ -198,10 +218,6 @@ app.get("/hotelSearch", async (req, res) => {
     });
 });
 
-let io = socket(server);
-io.on("connection", function (socket) {
-  console.log("Socket Connection Established with ID :" + socket.id);
-});
 var server = app.listen(process.env.PORT, () => {
   console.log("I am running on port = " + server.address().port + "!");
 });
