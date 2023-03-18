@@ -10,32 +10,32 @@
         <v-container>
           <v-card-title>
             <div>
-              <h4 class="headline mb-3">
+              <h4 class="headline">
                 {{ hotelName }}
               </h4>
             </div>
           </v-card-title>
-          <v-card-text class="mb-3">
+          <v-card-text>
             <v-container>
-              <div>
-                <span>
-                  {{ hotelFormatedAddress }}
-                </span>
-              </div>
-              <div>
-                <span>
-                  {{ hotelFormatedPhone }}
-                </span>
-              </div>
-              <div>
-                <span>
+              <div class="mb-3">
+                <p class="subtitle">
                   {{ editorialSummary }}
-                </span>
+                </p>
+              </div>
+              <div>
+                <p class="caption">
+                  {{ hotelFormatedAddress }}
+                </p>
+              </div>
+              <div>
+                <p class="caption">
+                  {{ hotelFormatedPhone }}
+                </p>
               </div>
             </v-container>
           </v-card-text>
           <!-- map -->
-          <v-container class="mb-3">
+          <v-container>
             <l-map
               class=".mapWrap"
               style="height: 300px"
@@ -48,14 +48,14 @@
               ></l-tile-layer>
               <l-marker :lat-lng="hotelGeo">
                 <l-popup>
-                  <span>
+                  <p>
                     {{ hotelName }}
-                  </span>
+                  </p>
                 </l-popup>
               </l-marker>
             </l-map>
           </v-container>
-          <v-container fluid>
+          <v-container>
             <v-slide-group
               class="pa-4"
               v-model="hotelReviews"
@@ -66,30 +66,50 @@
                 <v-container>
                   <v-card
                     class="mx-auto overflow-auto"
-                    max-width="600"
+                    max-width="400"
                     max-height="300"
                     elevation-11
                   >
                     <v-card-text>
-                      <span class="subtitle1">
-                        {{ hotelReview.author_name }}
-                      </span>
-                      <div>
-                        <span class="caption">
-                          {{ hotelReview.relative_time_description }}
-                        </span>
-                      </div>
-                      <div>
-                        <v-rating
-                          :value="hotelReview.rating"
-                          :max="5"
-                          color="amber"
-                          size="9"
-                          :readonly="true"
-                        >
-                        </v-rating>
-                      </div>
-                      <div>
+                      <v-row>
+                        <v-col>
+                          <p>
+                            <span class="subtitle1">
+                              {{ hotelReview.author_name }}
+                            </span>
+                            <br />
+                            <span class="caption">
+                              {{ hotelReview.relative_time_description }}
+                            </span>
+                            <span>
+                              <v-rating
+                                :value="hotelReview.rating"
+                                :max="5"
+                                color="amber"
+                                size="9"
+                                :readonly="true"
+                              >
+                              </v-rating>
+                            </span>
+                          </p>
+                        </v-col>
+
+                        <v-col>
+                          <v-avatar
+                            class="mx-auto"
+                            size="30"
+                            tile
+                            elevation="12"
+                          >
+                            <img
+                              :src="hotelReview.profile_photo_url"
+                              alt="profile_img"
+                            />
+                          </v-avatar>
+                        </v-col>
+                      </v-row>
+
+                      <div class="pa-4">
                         <p class="caption text-justify font-weight-thin">
                           {{ hotelReview.text }}
                         </p>
@@ -128,33 +148,33 @@
                 <v-col cols="4">
                   <div>
                     <v-icon>bed</v-icon>
-                    <span>
+                    <p>
                       {{ paginatedHotelOffer.room.typeEstimated.beds }}
                       {{ paginatedHotelOffer.room.typeEstimated.bedType }}
-                    </span>
+                    </p>
                   </div>
                   <v-spacer></v-spacer>
                   <div>
                     <v-icon>payments</v-icon>
-                    <span>
+                    <p>
                       {{ paginatedHotelOffer.price.total }}
                       {{ paginatedHotelOffer.price.currency }}
-                    </span>
+                    </p>
                   </div>
                 </v-col>
                 <v-col cols="4">
                   <div>
                     <v-icon>payment</v-icon>
-                    <span>
+                    <p>
                       {{ paginatedHotelOffer.policies.paymentType }}
-                    </span>
+                    </p>
                   </div>
                   <v-spacer></v-spacer>
                   <div>
                     <v-icon>person</v-icon>
-                    <span>
+                    <p>
                       {{ paginatedHotelOffer.guests.adults }}
-                    </span>
+                    </p>
                   </div>
                 </v-col>
                 <v-col class="d-flex justify-center">
@@ -193,31 +213,31 @@
                 <v-row align="center">
                   <v-col cols="8" sm="4" md="4">
                     <div>
-                      <span>
+                      <p>
                         {{ hotelOfferInfo.checkInDate }}
-                      </span>
+                      </p>
                       <v-icon>login</v-icon>
                     </div>
                     <div>
-                      <span>
+                      <p>
                         {{ hotelOfferInfo.checkOutDate }}
-                      </span>
+                      </p>
                       <v-icon>logout</v-icon>
                     </div>
                   </v-col>
                   <v-col cols="8" sm="4" md="4">
                     <div>
                       <v-icon>person</v-icon>
-                      <span>
+                      <p>
                         {{ hotelOfferInfo.guests.adults }}
-                      </span>
+                      </p>
                     </div>
                     <div>
                       <v-icon>payments</v-icon>
-                      <span>
+                      <p>
                         {{ hotelOfferInfo.price.total }}
                         {{ hotelOfferInfo.price.currency }}
-                      </span>
+                      </p>
                     </div>
                   </v-col>
                   <!--  <v-col cols="8" sm="4" md="4">
@@ -234,38 +254,38 @@
             </v-card-title>
             <v-card-text>
               <div>
-                <span>
+                <p>
                   {{ hotelOfferInfo.id }}
-                </span>
+                </p>
               </div>
             </v-card-text>
             <v-card-title> Room </v-card-title>
             <v-card-text>
               <div>
-                <span>
+                <p>
                   {{ hotelOfferInfo.description }}
-                </span>
+                </p>
               </div>
             </v-card-text>
             <v-card-title> Policy </v-card-title>
             <v-card-text>
               <div>
                 <h5>Room description:</h5>
-                <span>
+                <p>
                   {{ hotelOfferInfo.room.description.text }}
-                </span>
+                </p>
               </div>
               <div>
                 <h5>Cancellation policy:</h5>
-                <span>
+                <p>
                   {{ hotelOfferInfo.policies.cancellation }}
-                </span>
+                </p>
               </div>
               <div>
                 <h5>Payment type</h5>
-                <span>
+                <p>
                   {{ hotelOfferInfo.policies.paymentType }}
-                </span>
+                </p>
               </div>
             </v-card-text>
             <v-card-title> Taxes </v-card-title>
@@ -276,39 +296,39 @@
                     {{ i }}
                     <div>
                       <h5>Amount:</h5>
-                      <span>
+                      <p>
                         {{ tax.amount }}
-                      </span>
+                      </p>
                     </div>
                     <div>
                       <h5>Code:</h5>
-                      <span>
+                      <p>
                         {{ tax.code }}
-                      </span>
+                      </p>
                     </div>
                     <div>
                       <h5>Currency:</h5>
-                      <span>
+                      <p>
                         {{ tax.currency }}
-                      </span>
+                      </p>
                     </div>
                     <div>
                       <h5>Included:</h5>
-                      <span>
+                      <p>
                         {{ tax.included }}
-                      </span>
+                      </p>
                     </div>
                     <div>
                       <h5>Pricing Frequency:</h5>
-                      <span>
+                      <p>
                         {{ tax.pricingFrequency }}
-                      </span>
+                      </p>
                     </div>
                     <div>
                       <h5>Pricing Mode:</h5>
-                      <span>
+                      <p>
                         {{ tax.pricingMode }}
-                      </span>
+                      </p>
                     </div>
                   </v-col>
                 </div>
