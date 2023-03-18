@@ -1,131 +1,268 @@
 <template>
-  <v-card class="mx-auto background-transparency" elevation-20>
-    <v-container grid-list-md>
-      <v-alert text type="info" v-if="infoAlert">
-        {{ alertData }}
-      </v-alert>
-      <v-alert text type="error" v-if="errorAlert">
-        {{ alertData }}
-      </v-alert>
-
-      <v-row>
-        <v-col cols="12" sm="6" md="4">
-          <v-autocomplete
-            v-model="searched"
-            :items="items"
-            :search-input.sync="search"
-            :loading="searchQueryLoading"
-            :item-text="getItemText"
-            item-value="id"
-            label="Search for a hotel"
-            return-object
-            cache-items
-            :rules="[(v) => !!v || 'Required']"
-            :disabled="offerIsLoading"
-            prepend-icon="travel_explore"
-            hide-details
-            solo
-          >
-            <template v-slot:item="{ item }">
-              <v-list-item-content>
-                <v-list-item-title v-html="item.name"></v-list-item-title>
-                <v-list-item-subtitle
-                  >{{ item.address.cityName }} - {{ item.iataCode }} -
-                  {{ item.address.countryCode }}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </template>
-          </v-autocomplete>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
-          <v-menu
-            v-model="menu"
-            ref="menu"
-            :close-on-content-click="false"
-            :return-value.sync="dates"
-            transition="scale-transition"
-            offset-y
-            min-width="auto"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="dateRangeText"
-                label="Date Range"
-                prepend-icon="date_range"
-                readonly
+  <v-card class="mx-auto">
+    <v-tabs v-model="tab" class="background-transparency">
+      <v-tab>
+        <v-icon>hotel</v-icon>
+      </v-tab>
+      <v-tab>
+        <v-icon>travel_explore</v-icon>
+      </v-tab>
+      <v-tab-item>
+        <!-- HOTEL SEARCH -->
+        <v-container>
+          <v-alert text type="info" v-if="infoAlert">
+            {{ alertData }}
+          </v-alert>
+          <v-alert text type="error" v-if="errorAlert">
+            {{ alertData }}
+          </v-alert>
+          <v-row>
+            <v-col cols="12" sm="6" md="4">
+              <v-autocomplete
+                v-model="searched"
+                :items="items"
+                :search-input.sync="search"
+                :loading="searchQueryLoading"
+                :item-text="getItemText"
+                item-value="id"
+                label="Hotel Search"
+                return-object
+                cache-items
+                :rules="[(v) => !!v || 'Required']"
+                :disabled="offerIsLoading"
+                prepend-icon="travel_explore"
                 hide-details
-                v-bind="attrs"
+                solo
+              >
+                <template v-slot:item="{ item }">
+                  <v-list-item-content>
+                    <v-list-item-title v-html="item.name"></v-list-item-title>
+                    <v-list-item-subtitle
+                      >{{ item.address.cityName }} - {{ item.iataCode }} -
+                      {{ item.address.countryCode }}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-menu
+                v-model="menu"
+                ref="menu"
+                :close-on-content-click="false"
+                :return-value.sync="dates"
+                transition="scale-transition"
+                offset-y
+                min-width="auto"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="dateRangeText"
+                    label="Date Range"
+                    prepend-icon="date_range"
+                    readonly
+                    hide-details
+                    v-bind="attrs"
+                    :disabled="offerIsLoading"
+                    :rules="[(v) => !!v || 'Required']"
+                    v-on="on"
+                    solo
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="dates"
+                  no-title
+                  scrollable
+                  range
+                  format="yyyy-MM-dd"
+                  :allowed-dates="disablePastDates"
+                  color="secondary"
+                >
+                  <v-btn text color="secondary" @click="menu = false">
+                    Cancel
+                  </v-btn>
+                  <v-btn
+                    fab
+                    text
+                    color="success"
+                    @click="$refs.menu.save(dates)"
+                  >
+                    OK
+                  </v-btn>
+                </v-date-picker>
+              </v-menu>
+            </v-col>
+            <v-col cols="6" sm="4" md="2">
+              <v-combobox
+                v-model="adults"
+                prepend-icon="people"
+                label="Adults"
+                :items="adultsItems"
                 :disabled="offerIsLoading"
                 :rules="[(v) => !!v || 'Required']"
-                v-on="on"
+                hide-details
                 solo
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="dates"
-              no-title
-              scrollable
-              range
-              format="yyyy-MM-dd"
-              :allowed-dates="disablePastDates"
-              color="secondary"
-            >
-              <v-btn text color="secondary" @click="menu = false">
-                Cancel
+              >
+              </v-combobox>
+            </v-col>
+            <v-col cols="6" sm="4" md="2">
+              <v-combobox
+                v-model="rooms"
+                prepend-icon="meeting_room"
+                label="Rooms"
+                :items="roomsItems"
+                :disabled="offerIsLoading"
+                :rules="[(v) => !!v || '!required']"
+                hide-details
+                solo
+              >
+              </v-combobox>
+            </v-col>
+            <v-col class="d-flex justify-center">
+              <v-btn
+                class="mt-1"
+                :disabled="
+                  offerIsLoading ||
+                  searchQueryLoading ||
+                  !searched ||
+                  !dates ||
+                  !adults ||
+                  !rooms
+                "
+                :loading="offerIsLoading"
+                index="i;"
+                @click="getOfferByHotelId()"
+                color="blue"
+              >
+                Search
               </v-btn>
-              <v-btn fab text color="success" @click="$refs.menu.save(dates)">
-                OK
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-tab-item>
+      <v-tab-item>
+        <!-- CITY SEARCH -->
+        <v-container>
+          <v-alert text type="info" v-if="infoAlert">
+            {{ alertData }}
+          </v-alert>
+          <v-alert text type="error" v-if="errorAlert">
+            {{ alertData }}
+          </v-alert>
+          <v-row>
+            <v-col cols="12" sm="6" md="4">
+              <v-autocomplete
+                v-model="citySearched"
+                :items="cityItems"
+                :search-input.sync="citySearch"
+                :loading="searchQueryLoading"
+                item-text="name"
+                item-value="id"
+                label="City Search"
+                return-object
+                cache-items
+                :rules="[(v) => !!v || 'Required']"
+                :disabled="cityIsLoading"
+                prepend-icon="travel_explore"
+                hide-details
+                solo
+              >
+                <template v-slot:item="{ item }">
+                  <v-list-item-content>
+                    <v-list-item-title> {{ item.name }}</v-list-item-title>
+                    <v-list-item-subtitle
+                      >{{ item.iataCode }} - {{ item.address.countryCode }}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-menu
+                v-model="menu"
+                ref="menu"
+                :close-on-content-click="false"
+                :return-value.sync="dates"
+                transition="scale-transition"
+                offset-y
+                min-width="auto"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="dateRangeText"
+                    label="Date Range"
+                    prepend-icon="date_range"
+                    readonly
+                    hide-details
+                    v-bind="attrs"
+                    :disabled="cityIsLoading"
+                    v-on="on"
+                    solo
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="dates"
+                  no-title
+                  scrollable
+                  range
+                  format="yyyy-MM-dd"
+                  :allowed-dates="disablePastDates"
+                  color="secondary"
+                >
+                  <v-btn text color="secondary" @click="menu = false">
+                    Cancel
+                  </v-btn>
+                  <v-btn
+                    fab
+                    text
+                    color="success"
+                    @click="$refs.menu.save(dates)"
+                  >
+                    OK
+                  </v-btn>
+                </v-date-picker>
+              </v-menu>
+            </v-col>
+            <v-col cols="6" sm="4" md="2">
+              <v-combobox
+                v-model="adults"
+                prepend-icon="people"
+                label="Adults"
+                :items="adultsItems"
+                :disabled="cityIsLoading"
+                hide-details
+                solo
+              >
+              </v-combobox>
+            </v-col>
+            <v-col cols="6" sm="4" md="2">
+              <v-combobox
+                v-model="rooms"
+                prepend-icon="meeting_room"
+                label="Rooms"
+                :items="roomsItems"
+                :disabled="cityIsLoading"
+                hide-details
+                solo
+              >
+              </v-combobox>
+            </v-col>
+            <v-col class="d-flex justify-center">
+              <v-btn
+                class="mt-1"
+                :disabled="cityIsLoading || searchQueryLoading || !citySearched"
+                :loading="cityIsLoading"
+                index="i;"
+                @click="getHotelsByCity()"
+                color="blue"
+              >
+                Search
               </v-btn>
-            </v-date-picker>
-          </v-menu>
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <v-combobox
-            v-model="adults"
-            prepend-icon="people"
-            label="Adults"
-            :items="adultsItems"
-            :disabled="offerIsLoading"
-            :rules="[(v) => !!v || 'Required']"
-            hide-details
-            solo
-          >
-          </v-combobox>
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <v-combobox
-            v-model="rooms"
-            prepend-icon="meeting_room"
-            label="Rooms"
-            :items="roomsItems"
-            :disabled="offerIsLoading"
-            :rules="[(v) => !!v || '!required']"
-            hide-details
-            solo
-          >
-          </v-combobox>
-        </v-col>
-        <v-col class="d-flex justify-center">
-          <v-btn
-            class="mt-1"
-            :disabled="
-              offerIsLoading ||
-              searchQueryLoading ||
-              !searched ||
-              !dates ||
-              !adults ||
-              !rooms
-            "
-            :loading="offerIsLoading"
-            index="i;"
-            @click="getOfferByHotelId()"
-            color="blue"
-          >
-            Search
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-container>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-tab-item>
+    </v-tabs>
   </v-card>
 </template>
 <script>
@@ -135,18 +272,24 @@ export default {
   data() {
     return {
       items: [],
+      cityItems: [],
       searched: null,
+      citySearched: null,
       search: null,
+      citySearch: null,
       menu: false,
       dates: [],
 
-      adults: "",
+      tab: null,
+
+      adults: null,
       adultsItems: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      rooms: "",
+      rooms: null,
       roomsItems: [1, 2, 3, 4, 5, 6, 7, 8, 9],
 
       searchQueryLoading: false,
       offerIsLoading: false,
+      cityIsLoading: false,
 
       validForm: false,
       errorAlert: false,
@@ -163,6 +306,15 @@ export default {
         this.searchDebounced();
       } else {
         this.items = [];
+      }
+    },
+    citySearch(val) {
+      if (val && val.length <= 3) {
+        console.log("min 3 chars");
+      } else if (val && val.length >= 3) {
+        this.searchDebouncedCity();
+      } else {
+        this.cityItems = [];
       }
     },
   },
@@ -196,6 +348,7 @@ export default {
         alert("Form Submitted!");
       }
     },
+
     //debounce search query to avoid spamming the server
     searchDebounced() {
       this.searchQueryLoading = true;
@@ -217,7 +370,6 @@ export default {
               this.items = searchData;
               this.searchQueryLoading = false;
               this.resetAlerts();
-              console.log(searchData);
             }
           })
           .catch((err) => {
@@ -227,6 +379,27 @@ export default {
         //set timeout to 850ms
       }, 850);
     },
+
+    searchDebouncedCity() {
+      this.searchQueryLoading = true;
+
+      clearTimeout(this._timerId);
+      this._timerId = setTimeout(() => {
+        axios
+          .get("/citySearch", { params: { keyword: this.citySearch } })
+          .then((res) => {
+            console.log(res.data.data);
+            this.cityItems = res.data.data;
+
+            this.searchQueryLoading = false;
+          })
+          .catch((err) => {
+            this.searchQueryLoading = false;
+            console.log(err);
+          });
+      }, 850);
+    },
+
     //get hotel offers by hotelId
     getOfferByHotelId() {
       this.offerIsLoading = true;
@@ -237,7 +410,6 @@ export default {
         adults: this.adults,
         roomQuantity: this.rooms,
       };
-      console.log(searchData);
       axios
         .get("/offerSearch", {
           params: {
@@ -284,6 +456,37 @@ export default {
         })
         .catch((err) => {
           this.offerIsLoading = false;
+          console.log(err);
+        });
+    },
+    getHotelsByCity() {
+      this.cityIsLoading = true;
+      axios
+        .get("/cityHotels", {
+          params: {
+            cityCode: this.citySearched.iataCode,
+          },
+        })
+        .then((res) => {
+          this.cityIsLoading = false;
+          let cityHotels = {
+            cityName: this.citySearched.name,
+            cityHotels: res.data,
+            in: this.dates[0],
+            out: this.dates[1],
+            adults: this.adults,
+            roomQuantity: this.rooms,
+          };
+          router.push({
+            name: "CityWatch",
+            params: {
+              data: cityHotels,
+            },
+          });
+          console.log(cityHotels);
+        })
+        .catch((err) => {
+          this.cityIsLoading = false;
           console.log(err);
         });
     },
