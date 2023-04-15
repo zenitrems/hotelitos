@@ -179,8 +179,8 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-menu
-                v-model="menu"
-                ref="menu"
+                v-model="menu2"
+                ref="menu2"
                 :close-on-content-click="false"
                 :return-value.sync="dates"
                 transition="scale-transition"
@@ -278,6 +278,7 @@ export default {
       search: null,
       citySearch: null,
       menu: false,
+      menu2: false,
       dates: [],
 
       tab: null,
@@ -342,7 +343,6 @@ export default {
     disablePastDates(val) {
       return val >= new Date().toISOString().substr(0, 10);
     },
-
     validate() {
       if (this.$refs.form.validate()) {
         alert("Form Submitted!");
@@ -382,13 +382,11 @@ export default {
 
     searchDebouncedCity() {
       this.searchQueryLoading = true;
-
       clearTimeout(this._timerId);
       this._timerId = setTimeout(() => {
         axios
           .get("/citySearch", { params: { keyword: this.citySearch } })
           .then((res) => {
-            console.log(res.data.data);
             this.cityItems = res.data.data;
 
             this.searchQueryLoading = false;
@@ -400,7 +398,7 @@ export default {
       }, 850);
     },
 
-    //get hotel offers by hotelId
+    //GET SINGLE HOTEL INFO AND OFFERS
     getOfferByHotelId() {
       this.offerIsLoading = true;
       let searchData = {
@@ -422,7 +420,12 @@ export default {
         })
         .then((res) => {
           let resData = res.data;
-          if (resData.length == 1) {
+          if (resData.status == 500) {
+            this.offerIsLoading = false;
+            this.errorAlert = true && this.infoAlert == false;
+            this.alertData = resData.message;
+          }
+          if (resData.amadeusResponse.lenght == 1) {
             this.offerIsLoading = false;
             this.errorAlert = true && this.infoAlert == false;
             this.alertData =
@@ -433,18 +436,21 @@ export default {
               "-" +
               resData[0].tittle;
             return;
-          } else if (resData.data.length == 0) {
+          }
+          if (resData.amadeusResponse.length == 0) {
             this.offerIsLoading = false;
             this.infoAlert = true && this.errorAlert == false;
             this.alertData = "No Offers Found";
             return;
           } else {
-            let offerData = resData.data[0];
+            let offerData = resData.amadeusResponse[0];
+            let placeInfo = resData.placesInfo[0];
             this.resetAlerts();
             this.offerIsLoading = false;
             router.push({
               name: "HotelWatch",
               params: {
+                placeInfo: placeInfo,
                 hotelOffers: offerData.offers,
                 hotelData: {
                   data: offerData.hotel,

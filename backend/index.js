@@ -29,93 +29,127 @@ const amadeus = new Amadeus({
   clientSecret: process.env.AMADEUS_CLIENT_SECRET,
 });
 
-function handlePhoto(photoArray) {
-  photoArray.forEach((photo) => {
-    placesClient
-      .placePhoto({
-        params: {
-          photoreference: photo.photo_reference,
-          key: process.env.GOOGLE_API_KEY,
-          maxwidth: photo.width,
-          maxheight: photo.height,
-        },
-        timeout: 1000, // milliseconds
-      })
-      .then(function (response) {
-        let photo = response.request.res.responseUrl;
-        /* console.log(photo); */
-        return photo;
-      })
-      .catch(function (responseError) {
-        console.log(responseError);
-      });
+function handlePhoto(photoReference) {
+  return new Promise((resolve, reject) => {
+    try {
+      placesClient
+        .placePhoto({
+          params: {
+            photoreference: photoReference,
+            maxwidth: 800,
+            key: process.env.GOOGLE_API_KEY,
+          },
+          timeout: 2000, // milliseconds
+        })
+        .then(function (response) {
+          resolve(response.request.res.responseUrl);
+        })
+        .catch(function (responseError) {
+          console.log(responseError);
+          reject(responseError);
+        });
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
   });
 }
 
 function getPlaceInfoById(placeId) {
   return new Promise((resolve, reject) => {
-    placesClient
-      .placeDetails({
-        params: {
-          place_id: placeId,
-          key: process.env.GOOGLE_API_KEY,
-        },
-        timeout: 1000, // milliseconds
-      })
-      .then(function (response) {
-        resolve(response.data.result);
-      })
-      .catch(function (responseError) {
-        console.log(responseError);
-        reject(responseError);
-      });
+    try {
+      placesClient
+        .placeDetails({
+          params: {
+            place_id: placeId,
+            key: process.env.GOOGLE_API_KEY,
+          },
+          timeout: 2000, // milliseconds
+        })
+        .then(function (response) {
+          resolve(response.data.result);
+        })
+        .catch(function (responseError) {
+          console.log(responseError);
+          reject(responseError);
+        });
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
   });
 }
+function getPlaceByWord(word) {
+  return new Promise((resolve, reject) => {
+    try {
+      placesClient
+        .findPlaceFromText({
+          params: {
+            input: word,
+            inputtype: "textquery",
+            key: process.env.GOOGLE_API_KEY,
+          },
+          timeout: 2000, // milliseconds
+        })
+        .then(function (response) {
+          if (response.data.candidates.length > 0) {
+            resolve(getPlaceInfoById(response.data.candidates[0].place_id));
+          }
+        })
+        .catch(function (responseError) {
+          console.log(responseError);
+          reject(responseError);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  });
+}
+
+app.get("/fetchImage", async (req, res) => {
+  try {
+    const response = await handlePhoto(req.query.photoReference);
+    res.send(response);
+    res.status(200);
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+  }
+});
 
 app.get("/cityHotels", async (req, res) => {
   try {
     const response = await amadeus.referenceData.locations.hotels.byCity.get({
       cityCode: req.query.cityCode,
-      radius: "50",
+      radius: "20",
       radiusUnit: "KM",
     });
     if (response.result.data.length > 0) {
+      let amadeusHotels = response.result.data;
       try {
         const getPlaceInfo = await Promise.all(
-          response.result.data.map(async (hotel) => {
-            const response = await placesClient.findPlaceFromText({
-              params: {
-                input: hotel.name,
-                inputtype: "textquery",
-                key: process.env.GOOGLE_API_KEY,
-              },
-              timeout: 1000, // milliseconds
-            });
-            if (response.data.candidates.length > 0) {
-              try {
-                const placeId = await getPlaceInfoById(
-                  response.data.candidates[0].place_id
-                );
-                return placeId;
-              } catch (error) {
-                console.log(error);
-              }
-            } else {
-              return "No results";
-            }
+          amadeusHotels.map(async (hotel) => {
+            const placeInfo = await getPlaceByWord(hotel.name);
+            return placeInfo;
           })
         );
-        res.send(getPlaceInfo);
+        let hotels = {
+          amadeusHotels,
+          getPlaceInfo,
+        };
+        res.send(hotels);
         res.status(200);
       } catch (error) {
-        console.log(error);
+        res.status(500);
+        console.log("getPlaceInfo error", error);
       }
     } else {
       res.send("No results");
       res.status(400);
     }
   } catch (error) {
-    console.log(error);
+    res.status(500);
+    console.log("amadeusHotels error", error);
   }
 });
 
@@ -167,38 +201,30 @@ app.get("/placeAditionalInfo", async function (req, res) {
 572	INVALID LENGTH
 32171	MANDATORY DATA MISSING */
 app.get("/search", async (req, res) => {
-  amadeus.referenceData.locations.hotel
-    .get({
+  try {
+    const response = await amadeus.referenceData.locations.hotel.get({
       keyword: req.query.keyword,
       subType: "HOTEL_GDS", //"HOTEL_LEISURE"
       lang: "EN",
-    })
-    .then(function (response) {
-      res.send(response.result);
-      res.status(200);
-    })
-    .catch(function (responseError) {
-      console.log(responseError.description);
-      res.send(responseError.description);
-      res.status(400);
     });
+    res.send(response.result);
+    res.status(200);
+  } catch (error) {
+    console.log(error);
+  }
 });
-
+//SEARCH FOR CITY BY KEYWORD
 app.get("/citySearch", async (req, res) => {
-  amadeus.referenceData.locations.cities
-    .get({
+  try {
+    const response = await amadeus.referenceData.locations.cities.get({
       keyword: req.query.keyword,
-      max: "5",
-    })
-    .then(function (response) {
-      res.send(response.result);
-      res.status(200);
-    })
-    .catch(function (responseError) {
-      console.log(responseError.description);
-      res.send(responseError.description);
-      res.status(400);
+      max: "2",
     });
+    res.send(response.result);
+    res.status(200);
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 /* Get list of available offers in specific hotels by hotel id
@@ -227,8 +253,8 @@ app.get("/citySearch", async (req, res) => {
   784	PROVIDER TIME OUT
   790	RATE SECURITY NOT LOADED */
 app.get("/offerSearch", async (req, res) => {
-  amadeus.shopping.hotelOffersSearch
-    .get({
+  try {
+    const response = await amadeus.shopping.hotelOffersSearch.get({
       hotelIds: req.query.hotelIds,
       adults: req.query.adults,
       checkInDate: req.query.in,
@@ -237,25 +263,40 @@ app.get("/offerSearch", async (req, res) => {
       includeClosed: false,
       bestRateOnly: false,
       lang: "EN",
-      view: "FULL",
       currency: "USD",
-    })
-    .then(function (response) {
-      if (response.result.data.length > 0) {
-        res.send(response.result);
-        res.status(200);
-      } else {
-        res.send(response.result);
-        res.status(400);
-      }
-    })
-    .catch(function (responseError) {
-      console.log(responseError.description);
-      res.send(responseError.description);
-      res.status(400);
     });
-});
+    if (response.result.data.length > 0) {
+      try {
+        const placesInfo = await Promise.all(
+          response.result.data.map(async (hotel) => {
+            const placeInfo = await getPlaceByWord(hotel.hotel.name);
 
+            return placeInfo;
+          })
+        );
+
+        let hotels = {
+          amadeusResponse: response.result.data,
+          placesInfo,
+        };
+
+        res.send(hotels);
+        res.status(200);
+      } catch (error) {
+        res.status(500);
+        console.log("getPlaceInfo error", error);
+      }
+    }
+    if (!response.result.data) {
+      res.send(response.result);
+      res.status(400);
+    }
+  } catch (error) {
+    res.status(500);
+    console.log("amadeusHotels error", error);
+  }
+});
+//SEARCH FOR A SINGLE OFFER INFORMATION
 app.get("/offerById", async (req, res) => {
   amadeus.shopping
     .hotelOfferSearch(req.query.offerId)

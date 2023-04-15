@@ -9,52 +9,108 @@
       >
         <v-container>
           <v-card-title>
-            <div>
-              <h4 class="headline">
-                {{ hotelName }}
-              </h4>
-            </div>
+            <v-row>
+              <v-col cols="8">
+                <div>
+                  <h4 class="headline">
+                    {{ hotelName }}
+                  </h4>
+                </div>
+              </v-col>
+              <v-col>
+                <div>
+                  <span>
+                    <v-rating
+                      :value="hotelRating"
+                      :max="5"
+                      color="amber"
+                      size="15"
+                      :readonly="true"
+                    >
+                    </v-rating>
+                  </span>
+                </div>
+              </v-col>
+            </v-row>
           </v-card-title>
           <v-card-text>
             <v-container>
-              <div class="mb-3">
-                <p class="subtitle">
+              <p>
+                <span class="subtitle">
                   {{ editorialSummary }}
-                </p>
-              </div>
-              <div>
-                <p class="caption">
-                  {{ hotelFormatedAddress }}
-                </p>
-              </div>
-              <div>
-                <p class="caption">
-                  {{ hotelFormatedPhone }}
-                </p>
-              </div>
+                </span>
+                <span class="caption">
+                  <address>
+                    {{ hotelFormatedAddress }}
+                    <br />
+                    {{ hotelFormatedPhone }}
+                    <br />
+                    {{ internationalPhoneNumber }}
+                  </address>
+                </span>
+                <span class="caption">
+                  <a :href="hotelWebsite" target="_blank"> Hotel Website </a>
+                </span>
+              </p>
             </v-container>
           </v-card-text>
-          <!-- map -->
-          <v-container>
-            <l-map
-              class=".mapWrap"
-              style="height: 300px"
-              :zoom="zoom"
-              :center="hotelGeo"
-            >
-              <l-tile-layer
-                :url="url"
-                :attribution="attribution"
-              ></l-tile-layer>
-              <l-marker :lat-lng="hotelGeo">
-                <l-popup>
-                  <p>
-                    {{ hotelName }}
-                  </p>
-                </l-popup>
-              </l-marker>
-            </l-map>
-          </v-container>
+          <v-card>
+            <v-tabs v-model="tab" slider-color="primary">
+              <v-tab>
+                <p>Map</p>
+              </v-tab>
+              <v-tab>
+                <p>photos</p>
+              </v-tab>
+              <v-tab-item>
+                <!-- map -->
+                <v-container>
+                  <l-map
+                    class=".mapWrap"
+                    style="height: 400px"
+                    :zoom="zoom"
+                    :center="hotelGeo"
+                  >
+                    <l-tile-layer
+                      :url="url"
+                      :attribution="attribution"
+                    ></l-tile-layer>
+                    <l-marker :lat-lng="hotelGeo">
+                      <l-popup>
+                        <p>
+                          {{ hotelName }}
+                        </p>
+                      </l-popup>
+                    </l-marker>
+                  </l-map>
+                </v-container>
+              </v-tab-item>
+              <v-tab-item>
+                <v-container>
+                  <v-carousel
+                    height="400"
+                    hide-delimiter-background
+                    show-arrows-on-hover
+                  >
+                    <v-carousel-item
+                      v-for="(hotelImage, i) in hotelImages"
+                      :key="i"
+                    >
+                      <v-img
+                        contain
+                        max-width="auto"
+                        max-height="300"
+                        :src="himage"
+                        ><v-btn @click="fetchImge(hotelImage)"
+                          >Load Image</v-btn
+                        ></v-img
+                      >
+                    </v-carousel-item>
+                  </v-carousel>
+                </v-container>
+              </v-tab-item>
+            </v-tabs>
+          </v-card>
           <v-container>
             <v-slide-group
               class="pa-4"
@@ -66,7 +122,7 @@
                 <v-container>
                   <v-card
                     class="mx-auto overflow-auto"
-                    max-width="400"
+                    max-width="350"
                     max-height="300"
                     elevation-11
                   >
@@ -93,7 +149,6 @@
                             </span>
                           </p>
                         </v-col>
-
                         <v-col>
                           <v-avatar
                             class="mx-auto"
@@ -108,7 +163,6 @@
                           </v-avatar>
                         </v-col>
                       </v-row>
-
                       <div class="pa-4">
                         <p class="caption text-justify font-weight-thin">
                           {{ hotelReview.text }}
@@ -361,15 +415,26 @@ export default {
       perPage: 4,
       hotelOffers: [],
 
+      tab: null,
+
       hotelData: {},
 
       hotelId: "",
+      hotelRating: 0,
       hotelName: "",
       editorialSummary: "",
       hotelGeo: [0, 0],
       hotelFormatedAddress: "",
       hotelFormatedPhone: "",
+      internationalPhoneNumber: "",
+      hotelWebsite: "",
       hotelReviews: [],
+      hotelImages: [],
+
+      himage: "",
+
+      photoArrayReference: [],
+
       hotelOfferInfo: {
         checkInDate: "",
         checkOutDate: "",
@@ -397,26 +462,28 @@ export default {
         'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
     };
   },
-  created() {
+  mounted() {
     if (!this.$route.params.hotelData) {
       router.push({ name: "Home" });
     } else {
       let routerParams = this.$route.params;
 
-      let rawAddress = routerParams.hotelData.address;
       this.hotelOffers = routerParams.hotelOffers;
       this.hotelData = routerParams.hotelData.data;
-      this.hotelAddress = this.placeAditionalData(
-        routerParams.hotelData.data.name
-      );
-      rawAddress.cityName +
-        " " +
-        rawAddress.stateCode +
-        ", " +
-        rawAddress.countryCode;
+      this.placeInfo = routerParams.placeInfo;
+
       this.hotelId = this.hotelData.id;
       this.hotelName = this.hotelData.name;
       this.hotelGeo = [this.hotelData.latitude, this.hotelData.longitude];
+
+      this.hotelFormatedAddress = this.placeInfo.formatted_address;
+      this.hotelFormatedPhone = this.placeInfo.formatted_phone_number;
+      this.internationalPhoneNumber = this.placeInfo.international_phone_number;
+      this.hotelRating = this.placeInfo.rating;
+      this.editorialSummary = this.placeInfo.editorial_summary.overview;
+      this.hotelReviews = this.placeInfo.reviews;
+      this.hotelWebsite = this.placeInfo.website;
+      this.hotelImages = this.placeInfo.photos;
     }
   },
   computed: {
@@ -487,20 +554,15 @@ export default {
         });
       }
     },
-    placeAditionalData(hotelName) {
+    fetchImge(hotelImage) {
+      console.log(hotelImage);
       axios
-        .get("/placeAditionalInfo", { params: { hotelName: { hotelName } } })
+        .get("/fetchImage", {
+          params: { photoReference: hotelImage.photo_reference },
+        })
         .then((res) => {
-          this.hotelFormatedAddress = res.data.formatted_address;
-          this.hotelGeo = [
-            res.data.geometry.location.lat,
-            res.data.geometry.location.lng,
-          ];
-          this.photoArray = res.data.photos;
-          this.editorialSummary = res.data.editorial_summary.overview;
-          this.hotelFormatedPhone = res.data.formatted_phone_number;
-          this.hotelReviews = res.data.reviews;
           console.log(res.data);
+          this.himage = res.data;
         })
         .catch((err) => {
           console.log(err);
