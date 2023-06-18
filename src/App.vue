@@ -1,6 +1,6 @@
 <template>
   <v-app id="app" :style="{ 'background-Image': randomImage() }">
-    <v-app-bar absolute dense dark>
+    <v-app-bar dense dark>
       <v-menu left bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn icon v-bind="attrs" v-on="on">

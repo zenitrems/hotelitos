@@ -1,6 +1,6 @@
 <template>
   <v-row class="center-padding justify-center">
-    <v-col cols="4">
+    <v-col cols="8" sm="8" md="6">
       <v-container>
         <v-pagination
           class="mx-auto"
@@ -17,9 +17,6 @@
         <v-card-text>
           <p>
             <span>
-              {{ paginatedHotel.formatted_address }}
-            </span>
-            <span>
               <v-rating
                 :value="paginatedHotel.rating"
                 :max="5"
@@ -29,9 +26,12 @@
               >
               </v-rating>
             </span>
+            <span class="subtitle1">
+              {{ paginatedHotel.formatted_address }}
+            </span>
           </p>
           <p>
-            <span>
+            <span class="caption text-justify font-weight-thin">
               {{ paginatedHotel.editorial_summary }}
             </span>
           </p>
@@ -42,9 +42,6 @@
 </template>
 <script>
 import router from "../router";
-/* import axios from "axios";
-//qs is used to send array of data in query string
-import qs from "qs"; */
 export default {
   data() {
     return {
@@ -58,7 +55,7 @@ export default {
       router.push({ name: "Home" });
     } else {
       let routerParams = this.$route.params.data;
-      this.cityHotels = routerParams.cityHotels;
+      this.cityHotels = routerParams.cityHotels.getPlaceInfo;
       console.log(this.cityHotels);
     }
   },

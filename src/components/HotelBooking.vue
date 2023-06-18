@@ -1,7 +1,7 @@
 <template>
   <v-container class="mx-auto center-padding">
-    <v-sheet class="mx-auto" elevation="0" color="white">
-      <v-row align="start" justify="center">
+    <v-sheet color="transparent">
+      <v-row>
         <v-col cols="12" sm="12" md="4">
           <v-container>
             <v-card class="mx-auto">
@@ -97,121 +97,153 @@
         <v-col class="d-flex justify-center">
           <v-container>
             <v-card class="mx-auto">
-              <v-card-title primary-title>
-                <div>
-                  <h4 class="headline mb-3">
-                    {{ hotelData.name }}
-                  </h4>
-                </div>
-              </v-card-title>
-              <v-card-title> Offer description </v-card-title>
-              <v-card-text>
-                <v-row>
-                  <v-col class="d-flex justify-center">
-                    <div>
-                      <span>{{ offerData.checkInDate }}</span>
-                      <v-spacer></v-spacer>
-                      <span>{{ offerData.checkOutDate }}</span>
-                    </div>
-                  </v-col>
-                  <v-col class="d-flex justify-center">
-                    <div>
-                      <v-icon>person</v-icon>
-                      <span>{{ offerData.guests.adults }}</span>
-                      <v-spacer></v-spacer>
-                      <v-icon>room</v-icon>
-                      <span> {{ offerData.roomQuantity }}</span>
-                    </div>
-                  </v-col>
-                  <v-col class="d-flex justify-center">
-                    <div>
-                      <v-icon>payments</v-icon>
-                      <span>
-                        {{ offerData.price.total }}
-                        {{ offerData.price.currency }}
-                      </span>
-                      <v-spacer></v-spacer>
-                      <v-icon>payment</v-icon>
-                      <span> </span>
-                    </div>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-              <v-card-title> Room Details </v-card-title>
-              <v-card-text>
-                <div>
-                  <span>
-                    {{ offerData.description }}
-                  </span>
-                </div>
-              </v-card-text>
-              <v-card-title> Offer Policy </v-card-title>
-              <v-card-text>
-                <div>
-                  <h5>Room description:</h5>
-                  <span>
-                    {{ offerData.room.description.text }}
-                  </span>
-                </div>
-                <div>
-                  <h5>Cancellation policy:</h5>
-                  <span>
-                    {{ offerData.policies.cancellation }}
-                  </span>
-                </div>
-                <div>
-                  <h5>Payment type</h5>
-                  <span>
-                    {{ offerData.policies.paymentType }}
-                  </span>
-                </div>
-              </v-card-text>
-              <v-card-title> Taxes </v-card-title>
-              <v-card-text>
-                <v-row>
-                  <div v-for="(tax, i) in offerData.price.taxes" :key="i">
-                    <v-col>
-                      {{ i }}
+              <v-tabs color="primary" slider-color="primary">
+                <v-tab>Offer</v-tab>
+                <v-tab>Hotel</v-tab>
+
+                <v-tab-item>
+                  <v-card>
+                    <v-card-title primary-title>
+                      Offer description
+                    </v-card-title>
+                    <v-card-text>
+                      <v-row>
+                        <v-col class="d-flex justify-center">
+                          <div>
+                            <span>{{ offerData.checkInDate }}</span>
+                            <v-spacer></v-spacer>
+                            <span>{{ offerData.checkOutDate }}</span>
+                          </div>
+                        </v-col>
+                        <v-col class="d-flex justify-center">
+                          <div>
+                            <v-icon>person</v-icon>
+                            <span>{{ offerData.guests.adults }}</span>
+                            <v-spacer></v-spacer>
+                            <v-icon>room</v-icon>
+                            <span> {{ offerData.roomQuantity }}</span>
+                          </div>
+                        </v-col>
+                        <v-col class="d-flex justify-center">
+                          <div>
+                            <v-icon>payments</v-icon>
+                            <span>
+                              {{ offerData.price.total }}
+                              {{ offerData.price.currency }}
+                            </span>
+                            <v-spacer></v-spacer>
+                            <v-icon>payment</v-icon>
+                            <span> </span>
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                    <v-card-title> Room Details </v-card-title>
+                    <v-card-text>
                       <div>
-                        <h5>Amount:</h5>
                         <span>
-                          {{ tax.amount }}
+                          {{ offerData.description }}
+                        </span>
+                      </div>
+                    </v-card-text>
+                    <v-card-title> Offer Policy </v-card-title>
+                    <v-card-text>
+                      <div>
+                        <h5>Room description:</h5>
+                        <span>
+                          {{ offerData.room.description.text }}
                         </span>
                       </div>
                       <div>
-                        <h5>Code:</h5>
+                        <h5>Cancellation policy:</h5>
                         <span>
-                          {{ tax.code }}
+                          {{ offerData.policies.cancellation }}
                         </span>
                       </div>
                       <div>
-                        <h5>Currency:</h5>
+                        <h5>Payment type</h5>
                         <span>
-                          {{ tax.currency }}
+                          {{ offerData.policies.paymentType }}
                         </span>
                       </div>
-                      <div>
-                        <h5>Included:</h5>
-                        <span>
-                          {{ tax.included }}
-                        </span>
-                      </div>
-                      <div>
-                        <h5>Pricing Frequency:</h5>
-                        <span>
-                          {{ tax.pricingFrequency }}
-                        </span>
-                      </div>
-                      <div>
-                        <h5>Pricing Mode:</h5>
-                        <span>
-                          {{ tax.pricingMode }}
-                        </span>
-                      </div>
-                    </v-col>
-                  </div>
-                </v-row>
-              </v-card-text>
+                    </v-card-text>
+                    <v-card-title> Taxes </v-card-title>
+                    <v-card-text>
+                      <v-row>
+                        <div v-for="(tax, i) in offerData.price.taxes" :key="i">
+                          <v-col>
+                            {{ i }}
+                            <div>
+                              <h5>Amount:</h5>
+                              <span>
+                                {{ tax.amount }}
+                              </span>
+                            </div>
+                            <div>
+                              <h5>Code:</h5>
+                              <span>
+                                {{ tax.code }}
+                              </span>
+                            </div>
+                            <div>
+                              <h5>Currency:</h5>
+                              <span>
+                                {{ tax.currency }}
+                              </span>
+                            </div>
+                            <div>
+                              <h5>Included:</h5>
+                              <span>
+                                {{ tax.included }}
+                              </span>
+                            </div>
+                            <div>
+                              <h5>Pricing Frequency:</h5>
+                              <span>
+                                {{ tax.pricingFrequency }}
+                              </span>
+                            </div>
+                            <div>
+                              <h5>Pricing Mode:</h5>
+                              <span>
+                                {{ tax.pricingMode }}
+                              </span>
+                            </div>
+                          </v-col>
+                        </div>
+                      </v-row>
+                    </v-card-text>
+                  </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                  <v-card>
+                    <v-card-title primary-title mb-3>
+                      {{ hotelData.name }}
+                    </v-card-title>
+                    <!-- map -->
+                    <v-container>
+                      <l-map
+                        class=".mapWrap"
+                        style="height: 300px"
+                        :zoom="zoom"
+                        :center="hotelGeo"
+                      >
+                        <l-tile-layer
+                          :url="url"
+                          :attribution="attribution"
+                        ></l-tile-layer>
+                        <l-marker :lat-lng="hotelGeo">
+                          <l-popup>
+                            <span>
+                              {{ hotelData.name }}
+                            </span>
+                          </l-popup>
+                        </l-marker>
+                      </l-map>
+                    </v-container>
+                  </v-card>
+                </v-tab-item>
+              </v-tabs>
             </v-card>
           </v-container>
         </v-col>
@@ -219,7 +251,7 @@
       <v-row>
         <v-col cols="12">
           <v-container>
-            <v-btn block color="primary" @click="bookOffer()">Book Offer</v-btn>
+            <v-btn block color="success" @click="bookOffer()">Book Offer</v-btn>
           </v-container>
         </v-col>
       </v-row>
@@ -228,9 +260,16 @@
 </template>
 <script>
 import axios from "axios";
+import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
+import router from "@/router";
 
 export default {
-  name: "HotelBooking",
+  components: {
+    LMap,
+    LTileLayer,
+    LMarker,
+    LPopup,
+  },
   data() {
     return {
       title: "Mr",
@@ -245,6 +284,14 @@ export default {
       expiryDate: "2026-01",
 
       tab: null,
+      options: null,
+
+      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+
+      hotelGeo: [0, 0],
+      zoom: 13,
 
       hotelData: {
         chainCode: "",
@@ -301,17 +348,11 @@ export default {
           },
         },
       },
-
-      hotelGeo: [0, 0],
-      zoom: 13,
-      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-      attribution:
-        'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
     };
   },
   mounted() {
-    if (!this.$route.params) {
-      this.$router.push({ name: "/" });
+    if (!this.$route.params.hotelData) {
+      router.push({ name: "Home" });
     } else {
       let routerParams = this.$route.params;
       console.log(routerParams);
@@ -323,6 +364,7 @@ export default {
       ];
     }
   },
+
   methods: {
     bookOffer() {
       let data = {

@@ -36,7 +36,7 @@ function handlePhoto(photoReference) {
         .placePhoto({
           params: {
             photoreference: photoReference,
-            maxwidth: 800,
+            maxwidth: 400,
             key: process.env.GOOGLE_API_KEY,
           },
           timeout: 2000, // milliseconds
@@ -125,30 +125,25 @@ app.get("/cityHotels", async (req, res) => {
       radiusUnit: "KM",
     });
     if (response.result.data.length > 0) {
-      let amadeusHotels = response.result.data;
       try {
         const getPlaceInfo = await Promise.all(
-          amadeusHotels.map(async (hotel) => {
+          response.result.data.map(async (hotel) => {
             const placeInfo = await getPlaceByWord(hotel.name);
             return placeInfo;
           })
         );
         let hotels = {
-          amadeusHotels,
+          amadeusHotels: response.result.data,
           getPlaceInfo,
         };
         res.send(hotels);
-        res.status(200);
       } catch (error) {
-        res.status(500);
         console.log("getPlaceInfo error", error);
       }
     } else {
       res.send("No results");
-      res.status(400);
     }
   } catch (error) {
-    res.status(500);
     console.log("amadeusHotels error", error);
   }
 });
@@ -221,7 +216,6 @@ app.get("/citySearch", async (req, res) => {
       max: "2",
     });
     res.send(response.result);
-    res.status(200);
   } catch (error) {
     console.log(error);
   }
@@ -270,29 +264,24 @@ app.get("/offerSearch", async (req, res) => {
         const placesInfo = await Promise.all(
           response.result.data.map(async (hotel) => {
             const placeInfo = await getPlaceByWord(hotel.hotel.name);
-
             return placeInfo;
           })
         );
-
         let hotels = {
           amadeusResponse: response.result.data,
           placesInfo,
         };
-
         res.send(hotels);
-        res.status(200);
       } catch (error) {
-        res.status(500);
         console.log("getPlaceInfo error", error);
+        res.send(response.result.data);
       }
-    }
-    if (!response.result.data) {
-      res.send(response.result);
-      res.status(400);
+    } else {
+      res.send("No Offers Found");
+      console.log("No results");
     }
   } catch (error) {
-    res.status(500);
+    res.send(error.response);
     console.log("amadeusHotels error", error);
   }
 });
@@ -306,12 +295,10 @@ app.get("/offerById", async (req, res) => {
     })
     .then(function (response) {
       res.send(response.result);
-      res.status(200);
     })
     .catch(function (responseError) {
       console.log(responseError.description);
       res.send(responseError.description);
-      res.status(400);
     });
 });
 

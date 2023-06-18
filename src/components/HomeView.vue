@@ -420,24 +420,14 @@ export default {
         })
         .then((res) => {
           let resData = res.data;
-          if (resData.status == 500) {
+          console.log(resData);
+          if (resData.statusCode == 400) {
             this.offerIsLoading = false;
             this.errorAlert = true && this.infoAlert == false;
-            this.alertData = resData.message;
-          }
-          if (resData.amadeusResponse.lenght == 1) {
-            this.offerIsLoading = false;
-            this.errorAlert = true && this.infoAlert == false;
-            this.alertData =
-              "Code=" +
-              resData[0].code +
-              " - " +
-              resData[0].detail +
-              "-" +
-              resData[0].tittle;
+            this.alertData = resData.result.errors;
             return;
           }
-          if (resData.amadeusResponse.length == 0) {
+          if (resData == "No Offers Found") {
             this.offerIsLoading = false;
             this.infoAlert = true && this.errorAlert == false;
             this.alertData = "No Offers Found";
@@ -453,7 +443,7 @@ export default {
                 placeInfo: placeInfo,
                 hotelOffers: offerData.offers,
                 hotelData: {
-                  data: offerData.hotel,
+                  data: offerData.hotel,  
                   address: this.searched.address,
                 },
               },

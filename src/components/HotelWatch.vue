@@ -87,20 +87,16 @@
               </v-tab-item>
               <v-tab-item>
                 <v-container>
-                  <v-carousel
-                    height="400"
-                    hide-delimiter-background
-                    show-arrows-on-hover
-                  >
+                  <v-carousel hide-delimiter-background show-arrows-on-hover>
                     <v-carousel-item
                       v-for="(hotelImage, i) in hotelImages"
                       :key="i"
                     >
                       <v-img
+                        class="white--text align-end"
                         contain
-                        max-width="auto"
-                        max-height="300"
                         :src="himage"
+                        height="400px"
                         ><v-btn @click="fetchImge(hotelImage)"
                           >Load Image</v-btn
                         ></v-img
